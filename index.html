@@ -61,15 +61,54 @@
     </section>
 
     <!-- 3. PRODUCT GRID: Tempat produk akan di-render oleh JavaScript -->
-    <main class="container mx-auto px-4 py-12 flex-grow">
-        <h2 class="text-2xl font-brand font-bold mb-6 text-secondary border-l-4 border-primary pl-3">Produk Terbaru</h2>
-        
-        <!-- Grid Responsif: 1 kolom di HP, 2 di tablet, 4 di desktop -->
-        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Loading state -->
-            <p class="col-span-full text-center text-gray-500">Memuat produk...</p>
-        </div>
-    </main>
+	<main class="container mx-auto px-4 py-8 flex-grow">
+		
+		<!-- FILTER BAR BARU -->
+		<div class="bg-white rounded-xl shadow-sm p-4 mb-8 border border-gray-100">
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+				
+				<!-- Search Nama Produk (sudah ada, dipindah ke sini) -->
+				<div class="relative">
+					<input type="text" id="searchInput" placeholder="Cari nama produk..." 
+						   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+					<svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+				</div>
+
+				<!-- Filter Kategori/Brand -->
+				<select id="filterCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
+					<option value="">Semua Kategori</option>
+				</select>
+
+				<!-- Filter Nama Toko -->
+				<select id="filterStore" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
+					<option value="">Semua Toko</option>
+				</select>
+
+				<!-- Filter Tags -->
+				<select id="filterTag" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
+					<option value="">Semua Tags</option>
+				</select>
+			</div>
+
+			<!-- Tombol Reset Filter -->
+			<div class="mt-3 flex justify-end">
+				<button id="resetFilterBtn" class="text-sm text-accent hover:text-red-800 font-semibold flex items-center gap-1">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+					Reset Filter
+				</button>
+			</div>
+		</div>
+
+		<!-- Info jumlah produk hasil filter -->
+		<div class="flex justify-between items-center mb-6">
+			<h2 class="text-2xl font-brand font-bold text-secondary border-l-4 border-primary pl-3">Produk</h2>
+			<p id="productCount" class="text-sm text-gray-500">Memuat...</p>
+		</div>
+		
+		<div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+			<p class="col-span-full text-center text-gray-500">Memuat produk...</p>
+		</div>
+	</main>
 
     <!-- 4. FOOTER -->
     <footer class="bg-dark text-light py-8 mt-auto">

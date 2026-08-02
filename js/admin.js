@@ -74,17 +74,25 @@ logoutBtn.addEventListener('click', () => {
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Ambil nilai dari form
     const id = document.getElementById('productId').value;
+    
+    // Parse tags - pisah koma, trim spasi, ubah ke lowercase
+    const tagsRaw = document.getElementById('prodTags').value;
+    const tagsArray = tagsRaw
+        .split(',')                           // Pisah berdasarkan koma
+        .map(tag => tag.trim().toLowerCase()) // Hapus spasi & lowercase
+        .filter(tag => tag.length > 0);       // Buang yang kosong
+
     const productData = {
         name: document.getElementById('prodName').value,
         brand: document.getElementById('prodBrand').value,
+        storeName: document.getElementById('prodStoreName').value,
+        tags: tagsArray,                                            // disimpan sebagai array
         imageUrl: document.getElementById('prodImage').value,
         affiliateLink: document.getElementById('prodAffiliate').value,
         updatedAt: serverTimestamp()
     };
 
-    // Tambahkan createdAt hanya jika ini produk baru
     if (!id) {
         productData.createdAt = serverTimestamp();
     }
@@ -94,17 +102,15 @@ productForm.addEventListener('submit', async (e) => {
         submitBtn.textContent = "Menyimpan...";
 
         if (id) {
-            // UPDATE: Jika ada ID, berarti mode edit
             await updateDoc(doc(db, "products", id), productData);
             alert("Produk berhasil diperbarui!");
         } else {
-            // CREATE: Jika tidak ada ID, buat dokumen baru
             await addDoc(collection(db, "products"), productData);
             alert("Produk baru berhasil ditambahkan!");
         }
 
         resetForm();
-        loadAdminProducts(); // Refresh tabel
+        loadAdminProducts();
     } catch (error) {
         console.error("Gagal menyimpan produk:", error);
         alert("Terjadi kesalahan saat menyimpan.");
@@ -118,11 +124,11 @@ productForm.addEventListener('submit', async (e) => {
  * READ: Muat dan tampilkan daftar produk di tabel admin
  */
 async function loadAdminProducts() {
-    adminProductList.innerHTML = '<tr><td colspan="4" class="p-4 text-center">Memuat data...</td></tr>';
+    adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Memuat data...</td></tr>';
     
     try {
         const querySnapshot = await getDocs(collection(db, "products"));
-        adminProductList.innerHTML = ''; // Clear loading
+        adminProductList.innerHTML = '';
 
         querySnapshot.forEach((doc) => {
             const p = doc.data();
@@ -133,6 +139,14 @@ async function loadAdminProducts() {
                 <td class="p-4">
                     <div class="font-semibold text-dark">${p.name}</div>
                     <div class="text-xs text-gray-500">${p.brand || '-'}</div>
+                </td>
+                <td class="p-4 text-sm">${p.storeName || '-'}</td>
+                <td class="p-4">
+                    <div class="flex flex-wrap gap-1">
+                        ${(p.tags || []).map(tag => 
+                            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">${tag}</span>`
+                        ).join('')}
+                    </div>
                 </td>
                 <td class="p-4 text-right space-x-2">
                     <button onclick="window.editProduct('${doc.id}', '${encodeURIComponent(JSON.stringify(p))}')" 
@@ -172,15 +186,14 @@ window.editProduct = (id, productString) => {
     document.getElementById('productId').value = id;
     document.getElementById('prodName').value = p.name;
     document.getElementById('prodBrand').value = p.brand || '';
+    document.getElementById('prodStoreName').value = p.storeName || '';
+    document.getElementById('prodTags').value = (p.tags || []).join(', '); // array ke string
     document.getElementById('prodImage').value = p.imageUrl;
     document.getElementById('prodAffiliate').value = p.affiliateLink;
 
-    // Ubah UI ke mode Edit
     formTitle.textContent = "Edit Produk";
     submitBtn.textContent = "Perbarui Produk";
     cancelEditBtn.classList.remove('hidden');
-    
-    // Scroll ke form
     productForm.scrollIntoView({ behavior: 'smooth' });
 };
 
