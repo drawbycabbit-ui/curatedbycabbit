@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Affiliate Store</title>
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -65,20 +65,12 @@
                         <label class="block text-sm font-semibold mb-1">Brand / Kategori</label>
                         <input type="text" id="prodBrand" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Harga Jual (IDR) *</label>
-                        <input type="number" id="prodPrice" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Harga Coret / Asli (IDR) - Opsional</label>
-                        <input type="number" id="prodOriginalPrice" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
-                    </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold mb-1">URL Gambar Produk *</label>
                         <input type="url" id="prodImage" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold mb-1">Link Afiliasi (Shopee/Tokopedia/dll) *</label>
+                        <label class="block text-sm font-semibold mb-1">Link Afiliasi*</label>
                         <input type="url" id="prodAffiliate" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
                     </div>
                     
@@ -100,7 +92,6 @@
                             <tr>
                                 <th class="p-4">Gambar</th>
                                 <th class="p-4">Produk</th>
-                                <th class="p-4">Harga</th>
                                 <th class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>

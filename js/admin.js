@@ -79,8 +79,6 @@ productForm.addEventListener('submit', async (e) => {
     const productData = {
         name: document.getElementById('prodName').value,
         brand: document.getElementById('prodBrand').value,
-        price: Number(document.getElementById('prodPrice').value),
-        originalPrice: Number(document.getElementById('prodOriginalPrice').value) || null,
         imageUrl: document.getElementById('prodImage').value,
         affiliateLink: document.getElementById('prodAffiliate').value,
         updatedAt: serverTimestamp()
@@ -136,7 +134,6 @@ async function loadAdminProducts() {
                     <div class="font-semibold text-dark">${p.name}</div>
                     <div class="text-xs text-gray-500">${p.brand || '-'}</div>
                 </td>
-                <td class="p-4 font-mono text-sm">Rp ${p.price.toLocaleString('id-ID')}</td>
                 <td class="p-4 text-right space-x-2">
                     <button onclick="window.editProduct('${doc.id}', '${encodeURIComponent(JSON.stringify(p))}')" 
                             class="text-primary hover:text-secondary font-semibold text-xs border border-primary px-2 py-1 rounded">Edit</button>
@@ -175,8 +172,6 @@ window.editProduct = (id, productString) => {
     document.getElementById('productId').value = id;
     document.getElementById('prodName').value = p.name;
     document.getElementById('prodBrand').value = p.brand || '';
-    document.getElementById('prodPrice').value = p.price;
-    document.getElementById('prodOriginalPrice').value = p.originalPrice || '';
     document.getElementById('prodImage').value = p.imageUrl;
     document.getElementById('prodAffiliate').value = p.affiliateLink;
 
