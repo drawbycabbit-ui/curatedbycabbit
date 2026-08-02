@@ -17,10 +17,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Open Sans & Poppins sebagai pengganti Peace Sans yang tidak tersedia di CDN publik) -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Fontsource Fonts (Open Sans & Poppins) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/open-sans@latest/latin-400-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/open-sans@latest/latin-600-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/open-sans@latest/latin-700-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/poppins@latest/latin-500-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/poppins@latest/latin-600-normal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/poppins@latest/latin-700-normal.css">
     
-    <!-- Firebase SDK (Versi 8 Compat untuk kemudahan penggunaan tanpa build tool) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -62,11 +67,42 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 25px -5px rgba(142, 92, 178, 0.3);
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0a0002; }
         ::-webkit-scrollbar-thumb { background: #8e5cb2; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a67cc9; }
+        
+        .hero-section { position: relative; overflow: hidden; }
+        .hero-overlay {
+            background: linear-gradient(180deg, rgba(10, 0, 2, 0.3) 0%, rgba(10, 0, 2, 0.7) 50%, #0a0002 100%);
+        }
+        .hero-image { transition: transform 8s ease; }
+        .hero-section:hover .hero-image { transform: scale(1.05); }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+        
+        .stagger-1 { animation-delay: 0.05s; }
+        .stagger-2 { animation-delay: 0.1s; }
+        .stagger-3 { animation-delay: 0.15s; }
+        .stagger-4 { animation-delay: 0.2s; }
+        .stagger-5 { animation-delay: 0.25s; }
+        .stagger-6 { animation-delay: 0.3s; }
+        .stagger-7 { animation-delay: 0.35s; }
+        .stagger-8 { animation-delay: 0.4s; }
+        
+        /* Placeholder SVG untuk gambar yang gagal dimuat */
+        .img-placeholder {
+            background: linear-gradient(135deg, #053048 0%, #150a1f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e2e0f5;
+            font-family: 'Poppins', sans-serif;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -82,20 +118,48 @@
         </div>
     </header>
 
+    <!-- Hero Section -->
+    <section class="hero-section relative h-[60vh] min-h-[400px] max-h-[600px]">
+        <img src="https://image.qwenlm.ai/public_source/bd47c691-44fa-48a7-ae17-f87b8409db8e/1707a8d2c-ad28-4548-85ba-0c9c39ccff84.png" 
+             alt="curatedbycabbit hero" 
+             class="hero-image absolute inset-0 w-full h-full object-cover">
+        <div class="hero-overlay absolute inset-0 flex items-center justify-center">
+            <div class="text-center px-4 max-w-3xl">
+                <h2 class="text-4xl md:text-6xl font-heading font-bold text-textLight mb-4 leading-tight">
+                    Kurasi Terbaik untuk <span class="text-primary">Gaya Anda</span>
+                </h2>
+                <p class="text-lg md:text-xl text-textLight/80 mb-8 font-body">
+                    Temukan produk pilihan yang dikurasi dengan cermat untuk melengkapi kehidupan sehari-hari Anda.
+                </p>
+                <a href="#produk" class="inline-flex items-center gap-2 bg-accent hover:bg-accent/80 text-white font-bold py-3.5 px-8 rounded-lg transition shadow-lg shadow-accent/20 transform hover:scale-105">
+                    Jelajahi Produk
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <main class="flex-grow container mx-auto px-4 py-12">
         
-        <!-- Admin Panel (Tersembunyi secara default) -->
+        <!-- Admin Panel -->
         <div id="adminPanel" class="hidden mb-12 bg-cardBg border border-primary/30 rounded-xl p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-6 border-b border-primary/20 pb-4">
-                <h2 class="text-xl font-heading font-bold text-textLight">Panel Admin</h2>
+                <h2 class="text-xl font-heading font-bold text-textLight flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                    </svg>
+                    Panel Admin
+                </h2>
                 <button id="logoutBtn" class="text-accent hover:text-accent/80 font-semibold text-sm flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
                     Keluar
                 </button>
             </div>
             
-            <!-- Form Tambah/Edit Produk -->
+            <!-- Form Produk -->
             <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                 <input type="hidden" id="productId">
                 <div class="md:col-span-2">
@@ -120,55 +184,75 @@
                 </div>
             </form>
 
-            <!-- Daftar Produk untuk Admin -->
-           <!-- Ubah Kredensial Admin -->
-<details class="mb-8 bg-bgDark border border-primary/30 rounded-xl overflow-hidden group">
-    <summary class="cursor-pointer p-5 font-heading font-semibold text-textLight flex items-center justify-between hover:bg-primary/10 transition">
-        <span class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-            </svg>
-            Ubah Kredensial Admin
-        </span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-    </summary>
-    <div class="p-5 pt-0">
-        <p class="text-sm text-textLight/60 mb-4">
-            Untuk keamanan, masukkan kata sandi Anda saat ini sebelum melakukan perubahan. Kosongkan kolom yang tidak ingin diubah.
-        </p>
-        <form id="credentialForm" class="space-y-4">
-            <div>
-                <label class="block text-sm font-semibold mb-1.5 text-primary">Kata Sandi Saat Ini <span class="text-accent">*</span></label>
-                <input type="password" id="currentPassword" required class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+            <!-- Daftar Produk Admin -->
+            <div class="mb-8">
+                <h3 class="text-lg font-heading font-semibold text-textLight mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                    </svg>
+                    Daftar Produk
+                </h3>
+                <div id="adminProductList" class="space-y-3"></div>
             </div>
-            <div>
-                <label class="block text-sm font-semibold mb-1.5 text-primary">Email Baru (opsional)</label>
-                <input type="email" id="newEmail" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="email.baru@contoh.com">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1.5 text-primary">Kata Sandi Baru (opsional)</label>
-                    <input type="password" id="newPassword" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="Minimal 6 karakter">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1.5 text-primary">Konfirmasi Kata Sandi Baru</label>
-                    <input type="password" id="confirmPassword" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
-                </div>
-            </div>
-            <p id="credentialMsg" class="text-sm hidden font-medium"></p>
-            <button type="submit" id="credentialSubmitBtn" class="bg-primary hover:bg-primary/80 text-textLight font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-primary/20">
-                Simpan Perubahan
-            </button>
-        </form>
-    </div>
-</details>
 
-        <!-- Grid Produk Publik -->
-        <div id="publicProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Produk akan dimuat di sini -->
+            <!-- Ubah Kredensial -->
+            <details class="bg-bgDark border border-primary/30 rounded-xl overflow-hidden group">
+                <summary class="cursor-pointer p-5 font-heading font-semibold text-textLight flex items-center justify-between hover:bg-primary/10 transition">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                        Ubah Kredensial Admin
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="p-5 pt-0">
+                    <p class="text-sm text-textLight/60 mb-4">
+                        Untuk keamanan, masukkan kata sandi Anda saat ini sebelum melakukan perubahan. Kosongkan kolom yang tidak ingin diubah.
+                    </p>
+                    <form id="credentialForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1.5 text-primary">Kata Sandi Saat Ini <span class="text-accent">*</span></label>
+                            <input type="password" id="currentPassword" required class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1.5 text-primary">Email Baru (opsional)</label>
+                            <input type="email" id="newEmail" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="email.baru@contoh.com">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1.5 text-primary">Kata Sandi Baru (opsional)</label>
+                                <input type="password" id="newPassword" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="Minimal 6 karakter">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1.5 text-primary">Konfirmasi Kata Sandi Baru</label>
+                                <input type="password" id="confirmPassword" class="w-full bg-cardBg border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                            </div>
+                        </div>
+                        <p id="credentialMsg" class="text-sm hidden font-medium"></p>
+                        <button type="submit" id="credentialSubmitBtn" class="bg-primary hover:bg-primary/80 text-textLight font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-primary/20">
+                            Simpan Perubahan
+                        </button>
+                    </form>
+                </div>
+            </details>
         </div>
+
+        <!-- Section Title -->
+        <div id="produk" class="mb-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-textLight mb-3">
+                Produk <span class="text-primary">Pilihan</span>
+            </h2>
+            <p class="text-textLight/60 max-w-2xl mx-auto">
+                Koleksi produk terbaik yang kami kurasi khusus untuk Anda
+            </p>
+            <div class="mt-4 w-20 h-1 bg-primary mx-auto rounded-full"></div>
+        </div>
+        
+        <!-- Grid Produk Publik -->
+        <div id="publicProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         
         <!-- State Memuat -->
         <div id="loadingState" class="text-center py-16">
@@ -180,17 +264,19 @@
     <!-- Footer -->
     <footer class="bg-secondary/40 border-t border-primary/20 py-8 mt-auto">
         <div class="container mx-auto px-4 text-center text-textLight/50 text-sm">
-            <p>&copy; 2026 @curatedbycabbit. Semua hak dilindungi undang-undang.</p>
+            <p class="mb-2">&copy; 2026 @curatedbycabbit. Semua hak dilindungi undang-undang.</p>
+            <p class="text-xs text-textLight/40">Dibuat dengan ❤️ untuk para pecinta gaya hidup terbaik</p>
         </div>
     </footer>
 
     <!-- Modal Login -->
-    <div id="loginModal" class="fixed inset-0 bg-bgDark/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="loginModal" class="fixed inset-0 bg-bgDark/90 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-cardBg border border-primary/30 rounded-xl p-8 w-full max-w-md shadow-2xl relative">
             <button id="closeLoginModal" class="absolute top-4 right-4 text-textLight/50 hover:text-textLight">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <h2 class="text-2xl font-heading font-bold text-textLight mb-6 text-center">Masuk sebagai Admin</h2>
+            <h2 class="text-2xl font-heading font-bold text-textLight mb-2 text-center">Masuk sebagai Admin</h2>
+            <p class="text-textLight/60 text-sm text-center mb-6">Kelola produk dan kurasi koleksi Anda</p>
             <form id="loginForm" class="space-y-5">
                 <div>
                     <label class="block text-sm font-semibold mb-1.5 text-primary">Email</label>
@@ -207,32 +293,36 @@
     </div>
 
     <script>
-        // --- 1. KONFIGURASI FIREBASE ---
-        // PENTING: Ganti dengan konfigurasi dari Firebase Console Anda
+        // ============================================
+        // 1. KONFIGURASI FIREBASE
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCeX0xMhV9IFFDpaN5Lv4qyShSzVlxTJEA",
-			authDomain: "curatedbycabbit.firebaseapp.com",
-			databaseURL: "https://curatedbycabbit-default-rtdb.firebaseio.com",
-			projectId: "curatedbycabbit",
-			storageBucket: "curatedbycabbit.firebasestorage.app",
-			messagingSenderId: "475274795268",
-			appId: "1:475274795268:web:c8585cf73c02bea5f2d851",
-			measurementId: "G-68BKJJGBXP"
+            authDomain: "curatedbycabbit.firebaseapp.com",
+            databaseURL: "https://curatedbycabbit-default-rtdb.firebaseio.com",
+            projectId: "curatedbycabbit",
+            storageBucket: "curatedbycabbit.firebasestorage.app",
+            messagingSenderId: "475274795268",
+            appId: "1:475274795268:web:c8585cf73c02bea5f2d851",
+            measurementId: "G-68BKJJGBXP"
         };
 
-        // Inisialisasi Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. MANAJEMEN STATE ---
+        // ============================================
+        // 2. STATE
+        // ============================================
         let currentUser = null;
         let products = [];
         let isEditing = false;
 
-        // --- 3. REFERENSI DOM ---
+        // ============================================
+        // 3. REFERENSI DOM
+        // ============================================
         const adminBtn = document.getElementById('adminBtn');
         const adminBtnText = document.getElementById('adminBtnText');
         const adminPanel = document.getElementById('adminPanel');
@@ -247,82 +337,136 @@
         const closeLoginModal = document.getElementById('closeLoginModal');
         const loginError = document.getElementById('loginError');
 
-		// --- 4. AUTENTIKASI ---
-		auth.onAuthStateChanged(user => {
-			currentUser = user;
-		if (user) {
-			adminBtnText.textContent = 'Panel Admin';
-			adminPanel.classList.remove('hidden');
-        
-        // FIX: Properly hide the modal
-        loginModal.classList.add('hidden');
-        loginModal.classList.remove('flex'); 
-        
-        // UX FIX: Auto-scroll to the top so the user can see the admin panel
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        renderAdminProducts();
-		} else {
-        adminBtnText.textContent = 'Masuk Admin';
-        adminPanel.classList.add('hidden');
-        resetForm();
-			}
-		});
+        // ============================================
+        // 4. AUTENTIKASI
+        // ============================================
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                adminBtnText.textContent = 'Panel Admin';
+                adminPanel.classList.remove('hidden');
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex'); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                renderAdminProducts();
+            } else {
+                adminBtnText.textContent = 'Masuk Admin';
+                adminPanel.classList.add('hidden');
+                resetForm();
+            }
+        });
 
-		adminBtn.addEventListener('click', () => {
-			if (currentUser) {
-				adminPanel.classList.toggle('hidden');
-				// If the panel is now visible, scroll to it
-				if (!adminPanel.classList.contains('hidden')) {
-					window.scrollTo({ top: 0, behavior: 'smooth' });
-				}
-			} else {
-				// FIX: Properly show the modal by adding 'flex'
-				loginModal.classList.remove('hidden');
-				loginModal.classList.add('flex');
-			}
-		});
+        adminBtn.addEventListener('click', () => {
+            if (currentUser) {
+                adminPanel.classList.toggle('hidden');
+                if (!adminPanel.classList.contains('hidden')) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } else {
+                loginModal.classList.remove('hidden');
+                loginModal.classList.add('flex');
+            }
+        });
 
-		closeLoginModal.addEventListener('click', () => {
-			loginModal.classList.add('hidden');
-			loginModal.classList.remove('flex'); // FIX: Remove flex when hiding
-			loginError.classList.add('hidden');
-			loginForm.reset();
-		});
+        closeLoginModal.addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+            loginModal.classList.remove('flex');
+            loginError.classList.add('hidden');
+            loginForm.reset();
+        });
 
-		loginForm.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const email = document.getElementById('loginEmail').value;
-			const password = document.getElementById('loginPassword').value;
-			try {
-				await auth.signInWithEmailAndPassword(email, password);
-				loginForm.reset();
-				// The onAuthStateChanged listener above will handle showing the panel
-			} catch (error) {
-				loginError.textContent = "Email atau kata sandi salah. Silakan coba lagi.";
-				loginError.classList.remove('hidden');
-			}
-		});
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                loginForm.reset();
+            } catch (error) {
+                console.error('Login error:', error);
+                loginError.textContent = "Email atau kata sandi salah. Silakan coba lagi.";
+                loginError.classList.remove('hidden');
+            }
+        });
 
-        // --- 5. OPERASI FIRESTORE ---
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                adminPanel.classList.add('hidden');
+            } catch (error) {
+                console.error("Error logout: ", error);
+            }
+        });
+
+        // ============================================
+        // 5. FIRESTORE - LOAD PRODUCTS
+        // PERBAIKAN UTAMA ADA DI SINI
+        // ============================================
         function loadProducts() {
-            db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-                products = [];
-                snapshot.forEach(doc => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
-                renderPublicProducts();
-                if (currentUser) renderAdminProducts();
-                loadingState.classList.add('hidden');
-            }, error => {
-                console.error("Error mengambil data: ", error);
-                loadingState.innerHTML = '<p class="text-accent font-medium">Gagal memuat produk. Periksa konfigurasi Firebase.</p>';
-            });
+            console.log('[DEBUG] Memulai loadProducts()...');
+            
+            db.collection('products').orderBy('createdAt', 'desc').onSnapshot(
+                snapshot => {
+                    console.log('[DEBUG] Snapshot diterima. Jumlah dokumen:', snapshot.size);
+                    products = [];
+                    snapshot.forEach(doc => {
+                        products.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // PERBAIKAN: Selalu render produk publik, apapun statusnya
+                    renderPublicProducts();
+                    
+                    // Render admin hanya jika user login
+                    if (currentUser) {
+                        renderAdminProducts();
+                    }
+                    
+                    // Sembunyikan loading state
+                    loadingState.classList.add('hidden');
+                },
+                error => {
+                    console.error("[ERROR] Gagal mengambil data:", error);
+                    loadingState.classList.remove('hidden');
+                    
+                    // PERBAIKAN: Tampilkan pesan error yang informatif
+                    let errorMsg = 'Gagal memuat produk.';
+                    
+                    if (error.code === 'permission-denied') {
+                        errorMsg = '⚠️ Akses ditolak oleh Firestore Security Rules. ' +
+                                   'Pastikan rules Firestore Anda mengizinkan "read: if true" ' +
+                                   'untuk collection "products".';
+                        console.warn('[PERINGATAN] Firestore Security Rules memblokir akses baca publik!');
+                    } else if (error.code === 'unavailable') {
+                        errorMsg = 'Layanan Firestore tidak tersedia. Periksa koneksi internet Anda.';
+                    } else if (error.code === 'failed-precondition') {
+                        errorMsg = 'Index Firestore belum dibuat. Periksa console untuk detail.';
+                    }
+                    
+                    loadingState.innerHTML = `
+                        <div class="max-w-lg mx-auto bg-cardBg border border-accent/30 rounded-xl p-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-accent mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-accent font-semibold mb-2">${errorMsg}</p>
+                            <p class="text-textLight/60 text-sm">Kode error: <code class="bg-bgDark px-2 py-1 rounded text-xs">${error.code || 'unknown'}</code></p>
+                        </div>
+                    `;
+                    
+                    // Tetap coba render produk publik (jika ada data di cache)
+                    renderPublicProducts();
+                }
+            );
         }
 
+        // ============================================
+        // 6. FORM SUBMIT
+        // ============================================
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
+            if (!currentUser) {
+                alert("Anda harus login sebagai admin untuk menambah produk.");
+                return;
+            }
 
             const title = document.getElementById('productTitle').value;
             const description = document.getElementById('productDesc').value;
@@ -348,7 +492,7 @@
                 resetForm();
             } catch (error) {
                 console.error("Error menyimpan: ", error);
-                alert("Gagal menyimpan produk.");
+                alert("Gagal menyimpan produk: " + error.message);
             }
         });
 
@@ -386,25 +530,65 @@
             cancelEditBtn.classList.add('hidden');
         }
 
-        // --- 6. RENDERING UI ---
+        // ============================================
+        // 7. RENDERING UI
+        // ============================================
+        
+        // Fallback placeholder inline SVG (data URI) - tidak bergantung pada layanan eksternal
+        const PLACEHOLDER_IMAGE = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+                <defs>
+                    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#053048"/>
+                        <stop offset="100%" stop-color="#150a1f"/>
+                    </linearGradient>
+                </defs>
+                <rect width="400" height="400" fill="url(#g)"/>
+                <g fill="#e2e0f5" opacity="0.5" font-family="Poppins, sans-serif" text-anchor="middle">
+                    <text x="200" y="190" font-size="20">Gambar Tidak</text>
+                    <text x="200" y="220" font-size="20">Tersedia</text>
+                </g>
+            </svg>
+        `);
+
+        function handleImageError(img) {
+            img.onerror = null; // Prevent infinite loop
+            img.src = PLACEHOLDER_IMAGE;
+        }
+
         function renderPublicProducts() {
+            if (!publicProductGrid) return;
             publicProductGrid.innerHTML = '';
+            
+            console.log('[DEBUG] renderPublicProducts dipanggil. Jumlah produk:', products.length);
+            
             if (products.length === 0) {
                 publicProductGrid.innerHTML = '<p class="col-span-full text-center text-textLight/60 py-12 text-lg">Belum ada produk yang tersedia saat ini.</p>';
                 return;
             }
 
-            products.forEach(product => {
+            products.forEach((product, index) => {
                 const card = document.createElement('div');
-                card.className = 'product-card bg-cardBg border border-primary/20 rounded-xl overflow-hidden flex flex-col h-full';
+                const staggerClass = `stagger-${(index % 8) + 1}`;
+                card.className = `product-card bg-cardBg border border-primary/20 rounded-xl overflow-hidden flex flex-col h-full fade-in-up opacity-0 ${staggerClass}`;
+                
+                // Sanitasi sederhana untuk mencegah XSS
+                const safeTitle = escapeHtml(product.title || 'Tanpa Judul');
+                const safeDesc = escapeHtml(product.description || '');
+                const safeImage = escapeHtml(product.imageUrl || '');
+                const safeLink = escapeHtml(product.affiliateLink || '#');
+                
                 card.innerHTML = `
                     <div class="relative aspect-square overflow-hidden bg-secondary/50 group">
-                        <img src="${product.imageUrl}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400x400/053048/e2e0f5?text=Gambar+Tidak+Tersedia'">
+                        <img src="${safeImage}" alt="${safeTitle}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                             onerror="handleImageError(this)">
+                        <div class="absolute inset-0 bg-gradient-to-t from-bgDark/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
                     </div>
                     <div class="p-5 flex flex-col flex-grow">
-                        <h3 class="text-lg font-heading font-bold text-textLight mb-2 line-clamp-2 leading-tight">${product.title}</h3>
-                        <p class="text-textLight/70 text-sm mb-5 flex-grow line-clamp-3 leading-relaxed">${product.description}</p>
-                        <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" 
+                        <h3 class="text-lg font-heading font-bold text-textLight mb-2 line-clamp-2 leading-tight">${safeTitle}</h3>
+                        <p class="text-textLight/70 text-sm mb-5 flex-grow line-clamp-3 leading-relaxed">${safeDesc}</p>
+                        <a href="${safeLink}" target="_blank" rel="noopener noreferrer" 
                            class="mt-auto block w-full bg-accent hover:bg-accent/80 text-white text-center font-bold py-3.5 rounded-lg transition flex items-center justify-center gap-2 shadow-lg shadow-accent/20">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -417,7 +601,19 @@
             });
         }
 
+        // Helper untuk escape HTML (mencegah XSS)
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function renderAdminProducts() {
+            if (!adminProductList) return;
             adminProductList.innerHTML = '';
             if (products.length === 0) {
                 adminProductList.innerHTML = '<p class="text-textLight/60 text-center py-4">Belum ada produk yang ditambahkan.</p>';
@@ -427,11 +623,15 @@
             products.forEach(product => {
                 const item = document.createElement('div');
                 item.className = 'flex items-center gap-4 bg-bgDark p-3 rounded-lg border border-primary/20 hover:border-primary/40 transition';
+                const safeTitle = escapeHtml(product.title || '');
+                const safeImage = escapeHtml(product.imageUrl || '');
+                const safeLink = escapeHtml(product.affiliateLink || '');
+                
                 item.innerHTML = `
-                    <img src="${product.imageUrl}" class="w-16 h-16 object-cover rounded-md bg-secondary/50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/64/053048/e2e0f5?text=No'">
+                    <img src="${safeImage}" class="w-16 h-16 object-cover rounded-md bg-secondary/50 flex-shrink-0" onerror="handleImageError(this)">
                     <div class="flex-grow min-w-0">
-                        <h4 class="font-semibold text-textLight truncate">${product.title}</h4>
-                        <p class="text-xs text-textLight/50 truncate">${product.affiliateLink}</p>
+                        <h4 class="font-semibold text-textLight truncate">${safeTitle}</h4>
+                        <p class="text-xs text-textLight/50 truncate">${safeLink}</p>
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
                         <button onclick="editProduct('${product.id}')" class="bg-primary/20 hover:bg-primary/40 text-primary p-2.5 rounded-lg transition" title="Edit">
@@ -446,97 +646,90 @@
             });
         }
 
-        // --- 7. INISIALISASI ---
-        // --- 6.5 UBAH KREDENSIAL ADMIN ---
-const credentialForm = document.getElementById('credentialForm');
-const credentialMsg = document.getElementById('credentialMsg');
-const credentialSubmitBtn = document.getElementById('credentialSubmitBtn');
+        // ============================================
+        // 8. UBAH KREDENSIAL
+        // ============================================
+        const credentialForm = document.getElementById('credentialForm');
+        const credentialMsg = document.getElementById('credentialMsg');
+        const credentialSubmitBtn = document.getElementById('credentialSubmitBtn');
 
-function showCredentialMessage(text, isError = false) {
-    credentialMsg.textContent = text;
-    credentialMsg.classList.remove('hidden', 'text-accent', 'text-green-400');
-    credentialMsg.classList.add(isError ? 'text-accent' : 'text-green-400');
-}
-
-credentialForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentUser) return;
-
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newEmail = document.getElementById('newEmail').value.trim();
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Validasi: harus ada yang diubah
-    if (!newEmail && !newPassword) {
-        showCredentialMessage('Masukkan email baru atau kata sandi baru yang ingin diubah.', true);
-        return;
-    }
-
-    // Validasi: konfirmasi password harus cocok
-    if (newPassword && newPassword !== confirmPassword) {
-        showCredentialMessage('Kata sandi baru dan konfirmasi tidak cocok.', true);
-        return;
-    }
-
-    // Validasi: panjang password minimal
-    if (newPassword && newPassword.length < 6) {
-        showCredentialMessage('Kata sandi baru minimal 6 karakter.', true);
-        return;
-    }
-
-    credentialSubmitBtn.disabled = true;
-    credentialSubmitBtn.textContent = 'Memproses...';
-    credentialMsg.classList.add('hidden');
-
-    try {
-        // LANGKAH 1: Re-autentikasi (wajib oleh Firebase untuk operasi sensitif)
-        const credential = firebase.auth.EmailAuthProvider.credential(
-            currentUser.email,
-            currentPassword
-        );
-        await currentUser.reauthenticateWithCredential(credential);
-
-        // LANGKAH 2: Ubah email jika diisi
-        if (newEmail && newEmail !== currentUser.email) {
-            await currentUser.updateEmail(newEmail);
+        function showCredentialMessage(text, isError = false) {
+            credentialMsg.textContent = text;
+            credentialMsg.classList.remove('hidden', 'text-accent', 'text-green-400');
+            credentialMsg.classList.add(isError ? 'text-accent' : 'text-green-400');
         }
 
-        // LANGKAH 3: Ubah password jika diisi
-        if (newPassword) {
-            await currentUser.updatePassword(newPassword);
-        }
+        credentialForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
 
-        showCredentialMessage('✓ Kredensial berhasil diperbarui!', false);
-        credentialForm.reset();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newEmail = document.getElementById('newEmail').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // Auto-hide pesan sukses setelah 4 detik
-        setTimeout(() => {
+            if (!newEmail && !newPassword) {
+                showCredentialMessage('Masukkan email baru atau kata sandi baru yang ingin diubah.', true);
+                return;
+            }
+
+            if (newPassword && newPassword !== confirmPassword) {
+                showCredentialMessage('Kata sandi baru dan konfirmasi tidak cocok.', true);
+                return;
+            }
+
+            if (newPassword && newPassword.length < 6) {
+                showCredentialMessage('Kata sandi baru minimal 6 karakter.', true);
+                return;
+            }
+
+            credentialSubmitBtn.disabled = true;
+            credentialSubmitBtn.textContent = 'Memproses...';
             credentialMsg.classList.add('hidden');
-        }, 4000);
 
-    } catch (error) {
-        console.error('Error mengubah kredensial:', error);
-        let errorMsg = 'Gagal mengubah kredensial.';
-        
-        if (error.code === 'auth/wrong-password') {
-            errorMsg = 'Kata sandi saat ini salah.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMsg = 'Format email baru tidak valid.';
-        } else if (error.code === 'auth/email-already-in-use') {
-            errorMsg = 'Email tersebut sudah digunakan oleh akun lain.';
-        } else if (error.code === 'auth/requires-recent-login') {
-            errorMsg = 'Sesi login sudah kedaluwarsa. Silakan keluar dan masuk kembali.';
-        } else if (error.code === 'auth/weak-password') {
-            errorMsg = 'Kata sandi terlalu lemah.';
-        }
-        
-        showCredentialMessage(errorMsg, true);
-    } finally {
-        credentialSubmitBtn.disabled = false;
-        credentialSubmitBtn.textContent = 'Simpan Perubahan';
-    }
-});
+            try {
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    currentUser.email,
+                    currentPassword
+                );
+                await currentUser.reauthenticateWithCredential(credential);
+
+                if (newEmail && newEmail !== currentUser.email) {
+                    await currentUser.updateEmail(newEmail);
+                }
+
+                if (newPassword) {
+                    await currentUser.updatePassword(newPassword);
+                }
+
+                showCredentialMessage('✓ Kredensial berhasil diperbarui!', false);
+                credentialForm.reset();
+
+                setTimeout(() => {
+                    credentialMsg.classList.add('hidden');
+                }, 4000);
+
+            } catch (error) {
+                console.error('Error mengubah kredensial:', error);
+                let errorMsg = 'Gagal mengubah kredensial.';
+                
+                if (error.code === 'auth/wrong-password') errorMsg = 'Kata sandi saat ini salah.';
+                else if (error.code === 'auth/invalid-email') errorMsg = 'Format email baru tidak valid.';
+                else if (error.code === 'auth/email-already-in-use') errorMsg = 'Email tersebut sudah digunakan oleh akun lain.';
+                else if (error.code === 'auth/requires-recent-login') errorMsg = 'Sesi login sudah kedaluwarsa. Silakan keluar dan masuk kembali.';
+                else if (error.code === 'auth/weak-password') errorMsg = 'Kata sandi terlalu lemah.';
+                
+                showCredentialMessage(errorMsg, true);
+            } finally {
+                credentialSubmitBtn.disabled = false;
+                credentialSubmitBtn.textContent = 'Simpan Perubahan';
+            }
+        });
+
+        // ============================================
+        // 9. INISIALISASI
+        // ============================================
+        loadProducts();
     </script>
 </body>
 </html>
