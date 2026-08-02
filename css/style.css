@@ -1,0 +1,44 @@
+/* 
+  PENTING: Ganti URL font 'Outfit' di bawah dengan file font 'Peace Sans' Anda 
+  jika sudah memiliki file .woff2-nya. 'Outfit' digunakan sebagai fallback 
+  yang sangat mirip secara visual (modern, geometric sans-serif).
+*/
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;700&display=swap');
+
+:root {
+  /* Definisi Palette Warna sesuai permintaan */
+  --color-dark: #0a0002;
+  --color-light: #e2e0f5;
+  --color-primary: #8e5cb2;
+  --color-secondary: #053048;
+  --color-accent: #c20003;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+}
+
+h1, h2, h3, h4, h5, h6, .font-brand {
+  font-family: 'Outfit', 'Peace Sans', sans-serif; /* Menggunakan font brand untuk heading */
+}
+
+/* Efek hover pada kartu produk agar terasa premium seperti Zalora */
+.product-card {
+  transition: all 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(10, 0, 2, 0.1), 0 8px 10px -6px rgba(10, 0, 2, 0.1);
+}
+
+/* Badge diskon */
+.discount-badge {
+  background-color: var(--color-accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Affiliate Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { dark: '#0a0002', light: '#e2e0f5', primary: '#8e5cb2', secondary: '#053048', accent: '#c20003' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light text-dark min-h-screen">
+
+    <!-- Navbar Admin -->
+    <nav class="bg-dark text-white py-4 shadow-md">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <span class="font-brand text-xl font-bold">Admin Dashboard</span>
+            <div class="flex gap-4">
+                <a href="index.html" class="text-sm hover:text-primary transition">← Kembali ke Website</a>
+                <button id="logoutBtn" class="hidden text-sm bg-accent hover:bg-opacity-90 px-3 py-1 rounded transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- 1. LOGIN FORM (Ditampilkan jika belum login) -->
+        <div id="loginSection" class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg hidden">
+            <h2 class="text-2xl font-brand font-bold text-center mb-6 text-secondary">Login Admin</h2>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Email</label>
+                    <input type="email" id="loginEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Password</label>
+                    <input type="password" id="loginPassword" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-primary text-white font-bold py-2 rounded-lg hover:bg-opacity-90 transition">Masuk</button>
+                <p id="loginError" class="text-accent text-sm text-center hidden"></p>
+            </form>
+        </div>
+
+        <!-- 2. DASHBOARD CRUD (Ditampilkan jika sudah login) -->
+        <div id="dashboardSection" class="hidden">
+            
+            <!-- Form Tambah/Edit Produk -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h3 class="text-xl font-brand font-bold mb-4 text-secondary" id="formTitle">Tambah Produk Baru</h3>
+                <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="productId"> <!-- Hidden ID untuk mode Edit -->
+                    
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Nama Produk *</label>
+                        <input type="text" id="prodName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Brand / Kategori</label>
+                        <input type="text" id="prodBrand" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Harga Jual (IDR) *</label>
+                        <input type="number" id="prodPrice" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Harga Coret / Asli (IDR) - Opsional</label>
+                        <input type="number" id="prodOriginalPrice" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">URL Gambar Produk *</label>
+                        <input type="url" id="prodImage" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Link Afiliasi (Shopee/Tokopedia/dll) *</label>
+                        <input type="url" id="prodAffiliate" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                    </div>
+                    
+                    <div class="md:col-span-2 flex gap-3 mt-2">
+                        <button type="submit" id="submitBtn" class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-opacity-90 transition">Simpan Produk</button>
+                        <button type="button" id="cancelEditBtn" class="hidden bg-gray-300 text-dark font-bold py-2 px-6 rounded-lg hover:bg-gray-400 transition">Batal Edit</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabel Daftar Produk -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="text-xl font-brand font-bold text-secondary">Daftar Produk</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 text-sm uppercase text-gray-600">
+                            <tr>
+                                <th class="p-4">Gambar</th>
+                                <th class="p-4">Produk</th>
+                                <th class="p-4">Harga</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductList" class="divide-y divide-gray-100 text-sm">
+                            <!-- Data akan di-render di sini oleh admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
