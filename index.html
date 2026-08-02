@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>curatedbycabbit</title>
+    
+    <!-- Google Analytics (GANTI G-XXXXXXXXXX DENGAN ID ANDA) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX'); 
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Open Sans & Poppins sebagai pengganti Peace Sans yang tidak tersedia di CDN publik) -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (Versi 8 Compat untuk kemudahan penggunaan tanpa build tool) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgDark: '#0a0002',
+                        textLight: '#e2e0f5',
+                        primary: '#8e5cb2',
+                        secondary: '#053048',
+                        accent: '#c20003',
+                        cardBg: '#150a1f'
+                    },
+                    fontFamily: {
+                        heading: ['Poppins', 'sans-serif'],
+                        body: ['Open Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0a0002;
+            color: #e2e0f5;
+            font-family: 'Open Sans', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6, .font-heading {
+            font-family: 'Poppins', sans-serif;
+        }
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(142, 92, 178, 0.3);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0002; }
+        ::-webkit-scrollbar-thumb { background: #8e5cb2; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a67cc9; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-secondary/40 backdrop-blur-md border-b border-primary/20 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-heading font-bold text-primary tracking-wide">curatedbycabbit<span class="text-accent">.</span></h1>
+            <button id="adminBtn" class="bg-primary hover:bg-primary/80 text-textLight px-5 py-2.5 rounded-lg font-semibold transition flex items-center gap-2 shadow-lg shadow-primary/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span id="adminBtnText">Masuk Admin</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- Admin Panel (Tersembunyi secara default) -->
+        <div id="adminPanel" class="hidden mb-12 bg-cardBg border border-primary/30 rounded-xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6 border-b border-primary/20 pb-4">
+                <h2 class="text-xl font-heading font-bold text-textLight">Panel Admin</h2>
+                <button id="logoutBtn" class="text-accent hover:text-accent/80 font-semibold text-sm flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                    Keluar
+                </button>
+            </div>
+            
+            <!-- Form Tambah/Edit Produk -->
+            <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                <input type="hidden" id="productId">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">Judul Produk</label>
+                    <input type="text" id="productTitle" required class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">Deskripsi Produk</label>
+                    <textarea id="productDesc" required rows="3" class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">URL Gambar</label>
+                    <input type="url" id="productImage" required class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="https://contoh.com/gambar.jpg">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">Link Afiliasi Shopee</label>
+                    <input type="url" id="productLink" required class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition" placeholder="https://shopee.co.id/...">
+                </div>
+                <div class="md:col-span-2 flex gap-3 mt-2">
+                    <button type="submit" class="bg-accent hover:bg-accent/80 text-white px-8 py-3 rounded-lg font-bold transition flex-1 md:flex-none shadow-lg shadow-accent/20">Simpan Produk</button>
+                    <button type="button" id="cancelEditBtn" class="hidden bg-secondary hover:bg-secondary/80 text-textLight px-8 py-3 rounded-lg font-bold transition">Batal</button>
+                </div>
+            </form>
+
+            <!-- Daftar Produk untuk Admin -->
+            <h3 class="text-lg font-heading font-semibold mb-4 text-textLight">Kelola Produk</h3>
+            <div id="adminProductList" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                <!-- Item produk admin akan dimuat di sini -->
+            </div>
+        </div>
+
+        <!-- Grid Produk Publik -->
+        <div id="publicProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Produk akan dimuat di sini -->
+        </div>
+        
+        <!-- State Memuat -->
+        <div id="loadingState" class="text-center py-16">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+            <p class="mt-3 text-textLight/70 font-medium">Memuat produk...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary/40 border-t border-primary/20 py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center text-textLight/50 text-sm">
+            <p>&copy; 2026 @curatedbycabbit. Semua hak dilindungi undang-undang.</p>
+        </div>
+    </footer>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="fixed inset-0 bg-bgDark/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-primary/30 rounded-xl p-8 w-full max-w-md shadow-2xl relative">
+            <button id="closeLoginModal" class="absolute top-4 right-4 text-textLight/50 hover:text-textLight">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <h2 class="text-2xl font-heading font-bold text-textLight mb-6 text-center">Masuk sebagai Admin</h2>
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">Email</label>
+                    <input type="email" id="loginEmail" required class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-primary">Kata Sandi</label>
+                    <input type="password" id="loginPassword" required class="w-full bg-bgDark border border-primary/30 rounded-lg px-4 py-3 text-textLight focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition">
+                </div>
+                <p id="loginError" class="text-accent text-sm hidden text-center font-medium"></p>
+                <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-textLight font-bold py-3 rounded-lg transition shadow-lg shadow-primary/20">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. KONFIGURASI FIREBASE ---
+        // PENTING: Ganti dengan konfigurasi dari Firebase Console Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeX0xMhV9IFFDpaN5Lv4qyShSzVlxTJEA",
+			authDomain: "curatedbycabbit.firebaseapp.com",
+			databaseURL: "https://curatedbycabbit-default-rtdb.firebaseio.com",
+			projectId: "curatedbycabbit",
+			storageBucket: "curatedbycabbit.firebasestorage.app",
+			messagingSenderId: "475274795268",
+			appId: "1:475274795268:web:c8585cf73c02bea5f2d851",
+			measurementId: "G-68BKJJGBXP"
+        };
+
+        // Inisialisasi Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // --- 2. MANAJEMEN STATE ---
+        let currentUser = null;
+        let products = [];
+        let isEditing = false;
+
+        // --- 3. REFERENSI DOM ---
+        const adminBtn = document.getElementById('adminBtn');
+        const adminBtnText = document.getElementById('adminBtnText');
+        const adminPanel = document.getElementById('adminPanel');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const productForm = document.getElementById('productForm');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const publicProductGrid = document.getElementById('publicProductGrid');
+        const adminProductList = document.getElementById('adminProductList');
+        const loadingState = document.getElementById('loadingState');
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const loginError = document.getElementById('loginError');
+
+        // --- 4. AUTENTIKASI ---
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                adminBtnText.textContent = 'Panel Admin';
+                adminPanel.classList.remove('hidden');
+                loginModal.classList.add('hidden');
+                renderAdminProducts();
+            } else {
+                adminBtnText.textContent = 'Masuk Admin';
+                adminPanel.classList.add('hidden');
+                resetForm();
+            }
+        });
+
+        adminBtn.addEventListener('click', () => {
+            if (currentUser) {
+                adminPanel.classList.toggle('hidden');
+            } else {
+                loginModal.classList.remove('hidden');
+            }
+        });
+
+        closeLoginModal.addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+            loginError.classList.add('hidden');
+            loginForm.reset();
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                loginForm.reset();
+            } catch (error) {
+                loginError.textContent = "Email atau kata sandi salah. Silakan coba lagi.";
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // --- 5. OPERASI FIRESTORE ---
+        function loadProducts() {
+            db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+                products = [];
+                snapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                renderPublicProducts();
+                if (currentUser) renderAdminProducts();
+                loadingState.classList.add('hidden');
+            }, error => {
+                console.error("Error mengambil data: ", error);
+                loadingState.innerHTML = '<p class="text-accent font-medium">Gagal memuat produk. Periksa konfigurasi Firebase.</p>';
+            });
+        }
+
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const title = document.getElementById('productTitle').value;
+            const description = document.getElementById('productDesc').value;
+            const imageUrl = document.getElementById('productImage').value;
+            const affiliateLink = document.getElementById('productLink').value;
+            const productId = document.getElementById('productId').value;
+
+            const productData = {
+                title,
+                description,
+                imageUrl,
+                affiliateLink,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (isEditing && productId) {
+                    await db.collection('products').doc(productId).update(productData);
+                } else {
+                    productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('products').add(productData);
+                }
+                resetForm();
+            } catch (error) {
+                console.error("Error menyimpan: ", error);
+                alert("Gagal menyimpan produk.");
+            }
+        });
+
+        async function deleteProduct(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus produk ini secara permanen?')) return;
+            try {
+                await db.collection('products').doc(id).delete();
+            } catch (error) {
+                console.error("Error menghapus: ", error);
+                alert("Gagal menghapus produk.");
+            }
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productTitle').value = product.title;
+            document.getElementById('productDesc').value = product.description;
+            document.getElementById('productImage').value = product.imageUrl;
+            document.getElementById('productLink').value = product.affiliateLink;
+
+            isEditing = true;
+            cancelEditBtn.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        cancelEditBtn.addEventListener('click', resetForm);
+
+        function resetForm() {
+            productForm.reset();
+            document.getElementById('productId').value = '';
+            isEditing = false;
+            cancelEditBtn.classList.add('hidden');
+        }
+
+        // --- 6. RENDERING UI ---
+        function renderPublicProducts() {
+            publicProductGrid.innerHTML = '';
+            if (products.length === 0) {
+                publicProductGrid.innerHTML = '<p class="col-span-full text-center text-textLight/60 py-12 text-lg">Belum ada produk yang tersedia saat ini.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card bg-cardBg border border-primary/20 rounded-xl overflow-hidden flex flex-col h-full';
+                card.innerHTML = `
+                    <div class="relative aspect-square overflow-hidden bg-secondary/50 group">
+                        <img src="${product.imageUrl}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400x400/053048/e2e0f5?text=Gambar+Tidak+Tersedia'">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h3 class="text-lg font-heading font-bold text-textLight mb-2 line-clamp-2 leading-tight">${product.title}</h3>
+                        <p class="text-textLight/70 text-sm mb-5 flex-grow line-clamp-3 leading-relaxed">${product.description}</p>
+                        <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" 
+                           class="mt-auto block w-full bg-accent hover:bg-accent/80 text-white text-center font-bold py-3.5 rounded-lg transition flex items-center justify-center gap-2 shadow-lg shadow-accent/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Beli di Shopee
+                        </a>
+                    </div>
+                `;
+                publicProductGrid.appendChild(card);
+            });
+        }
+
+        function renderAdminProducts() {
+            adminProductList.innerHTML = '';
+            if (products.length === 0) {
+                adminProductList.innerHTML = '<p class="text-textLight/60 text-center py-4">Belum ada produk yang ditambahkan.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-4 bg-bgDark p-3 rounded-lg border border-primary/20 hover:border-primary/40 transition';
+                item.innerHTML = `
+                    <img src="${product.imageUrl}" class="w-16 h-16 object-cover rounded-md bg-secondary/50 flex-shrink-0" onerror="this.src='https://via.placeholder.com/64/053048/e2e0f5?text=No'">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="font-semibold text-textLight truncate">${product.title}</h4>
+                        <p class="text-xs text-textLight/50 truncate">${product.affiliateLink}</p>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="editProduct('${product.id}')" class="bg-primary/20 hover:bg-primary/40 text-primary p-2.5 rounded-lg transition" title="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                        </button>
+                        <button onclick="deleteProduct('${product.id}')" class="bg-accent/20 hover:bg-accent/40 text-accent p-2.5 rounded-lg transition" title="Hapus">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                `;
+                adminProductList.appendChild(item);
+            });
+        }
+
+        // --- 7. INISIALISASI ---
+        loadProducts();
+    </script>
+</body>
+</html>
