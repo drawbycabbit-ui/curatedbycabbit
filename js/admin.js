@@ -26,25 +26,24 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formTitle = document.getElementById('formTitle');
 const submitBtn = document.getElementById('submitBtn');
 
+// Cache untuk menyimpan data produk sementara agar tidak perlu parse JSON lagi
+let productsCache = {};
+
 // --- 1. MANAJEMEN AUTENTIKASI ---
 
-// Listener status login: otomatis menyesuaikan tampilan UI
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // User sudah login
         loginSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
         logoutBtn.classList.remove('hidden');
-        loadAdminProducts(); // Muat data produk
+        loadAdminProducts();
     } else {
-        // User belum login
         loginSection.classList.remove('hidden');
         dashboardSection.classList.add('hidden');
         logoutBtn.classList.add('hidden');
     }
 });
 
-// Handle proses Login
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
@@ -61,41 +60,32 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Handle proses Logout
-logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-});
+logoutBtn.addEventListener('click', () => signOut(auth));
 
 // --- 2. MANAJEMEN DATA PRODUK (CRUD) ---
 
-/**
- * CREATE & UPDATE: Handle submit form produk
- */
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const id = document.getElementById('productId').value;
     
-    // Parse tags - pisah koma, trim spasi, ubah ke lowercase
     const tagsRaw = document.getElementById('prodTags').value;
     const tagsArray = tagsRaw
-        .split(',')                           // Pisah berdasarkan koma
-        .map(tag => tag.trim().toLowerCase()) // Hapus spasi & lowercase
-        .filter(tag => tag.length > 0);       // Buang yang kosong
+        .split(',')
+        .map(tag => tag.trim().toLowerCase())
+        .filter(tag => tag.length > 0);
 
     const productData = {
         name: document.getElementById('prodName').value,
         brand: document.getElementById('prodBrand').value,
         storeName: document.getElementById('prodStoreName').value,
-        tags: tagsArray,                                            // disimpan sebagai array
+        tags: tagsArray,
         imageUrl: document.getElementById('prodImage').value,
         affiliateLink: document.getElementById('prodAffiliate').value,
         updatedAt: serverTimestamp()
     };
 
-    if (!id) {
-        productData.createdAt = serverTimestamp();
-    }
+    if (!id) productData.createdAt = serverTimestamp();
 
     try {
         submitBtn.disabled = true;
@@ -120,89 +110,105 @@ productForm.addEventListener('submit', async (e) => {
     }
 });
 
-/**
- * READ: Muat dan tampilkan daftar produk di tabel admin
- */
+// Helper: Mencegah XSS & SyntaxError (Karakter < > & " ' diubah jadi aman)
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')   // Mencegah kutip ganda merusak atribut HTML
+        .replace(/'/g, '&#039;');  // Mencegah kutip tunggal merusak atribut HTML
+}
+
 async function loadAdminProducts() {
     adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Memuat data...</td></tr>';
+    productsCache = {}; // Reset cache
     
     try {
         const querySnapshot = await getDocs(collection(db, "products"));
         adminProductList.innerHTML = '';
 
-        querySnapshot.forEach((doc) => {
-            const p = doc.data();
+        querySnapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            productsCache[docSnap.id] = p; // Simpan objek asli ke cache
+            
             const row = document.createElement('tr');
             row.className = "hover:bg-gray-50 transition";
+            
             row.innerHTML = `
-                <td class="p-4"><img src="${p.imageUrl}" class="w-12 h-12 object-cover rounded bg-gray-200"></td>
+                <td class="p-4"><img src="${escapeHTML(p.imageUrl)}" class="w-12 h-12 object-cover rounded bg-gray-200" onerror="this.src='https://via.placeholder.com/48'"></td>
                 <td class="p-4">
-                    <div class="font-semibold text-dark">${p.name}</div>
-                    <div class="text-xs text-gray-500">${p.brand || '-'}</div>
+                    <div class="font-semibold text-dark">${escapeHTML(p.name)}</div>
+                    <div class="text-xs text-gray-500">${escapeHTML(p.brand || '-')}</div>
                 </td>
-                <td class="p-4 text-sm">${p.storeName || '-'}</td>
+                <td class="p-4 text-sm">${escapeHTML(p.storeName || '-')}</td>
                 <td class="p-4">
                     <div class="flex flex-wrap gap-1">
                         ${(p.tags || []).map(tag => 
-                            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">${tag}</span>`
+                            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">${escapeHTML(tag)}</span>`
                         ).join('')}
                     </div>
                 </td>
                 <td class="p-4 text-right space-x-2">
-                    <button onclick="window.editProduct('${doc.id}', '${encodeURIComponent(JSON.stringify(p))}')" 
-                            class="text-primary hover:text-secondary font-semibold text-xs border border-primary px-2 py-1 rounded">Edit</button>
-                    <button onclick="window.deleteProduct('${doc.id}')" 
-                            class="text-accent hover:text-red-800 font-semibold text-xs border border-accent px-2 py-1 rounded">Hapus</button>
+                    <button class="edit-btn text-primary hover:text-secondary font-semibold text-xs border border-primary px-2 py-1 rounded" data-id="${docSnap.id}">Edit</button>
+                    <button class="delete-btn text-accent hover:text-red-800 font-semibold text-xs border border-accent px-2 py-1 rounded" data-id="${docSnap.id}">Hapus</button>
                 </td>
             `;
             adminProductList.appendChild(row);
         });
     } catch (error) {
         console.error("Gagal memuat data:", error);
+        adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal memuat data.</td></tr>';
     }
 }
 
-/**
- * DELETE: Hapus produk dari Firestore
- */
-window.deleteProduct = async (id) => {
+// EVENT DELEGATION: Menangani klik tombol Edit dan Hapus secara terpusat
+adminProductList.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-btn');
+    const deleteBtn = e.target.closest('.delete-btn');
+
+    if (editBtn) {
+        const id = editBtn.dataset.id;
+        const productData = productsCache[id];
+        if (productData) prepareEditProduct(id, productData);
+    }
+
+    if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        deleteProduct(id);
+    }
+});
+
+async function deleteProduct(id) {
     if (confirm("Yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.")) {
         try {
             await deleteDoc(doc(db, "products", id));
-            loadAdminProducts(); // Refresh tabel
+            loadAdminProducts();
         } catch (error) {
             console.error("Gagal menghapus:", error);
             alert("Gagal menghapus produk.");
         }
     }
-};
+}
 
-/**
- * PREPARE EDIT: Isi form dengan data produk yang dipilih
- */
-window.editProduct = (id, productString) => {
-    const p = JSON.parse(decodeURIComponent(productString));
-    
+function prepareEditProduct(id, p) {
     document.getElementById('productId').value = id;
-    document.getElementById('prodName').value = p.name;
+    document.getElementById('prodName').value = p.name || '';
     document.getElementById('prodBrand').value = p.brand || '';
     document.getElementById('prodStoreName').value = p.storeName || '';
-    document.getElementById('prodTags').value = (p.tags || []).join(', '); // array ke string
-    document.getElementById('prodImage').value = p.imageUrl;
-    document.getElementById('prodAffiliate').value = p.affiliateLink;
+    document.getElementById('prodTags').value = (p.tags || []).join(', ');
+    document.getElementById('prodImage').value = p.imageUrl || '';
+    document.getElementById('prodAffiliate').value = p.affiliateLink || '';
 
     formTitle.textContent = "Edit Produk";
     submitBtn.textContent = "Perbarui Produk";
     cancelEditBtn.classList.remove('hidden');
     productForm.scrollIntoView({ behavior: 'smooth' });
-};
+}
 
-// Handle tombol batal edit
 cancelEditBtn.addEventListener('click', resetForm);
 
-/**
- * Utility: Reset form ke kondisi awal (mode tambah baru)
- */
 function resetForm() {
     productForm.reset();
     document.getElementById('productId').value = '';

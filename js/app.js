@@ -49,6 +49,9 @@ let allProducts = []; // Semua produk dari Firebase
 let uniqueCategories = []; // Daftar kategori unik untuk dropdown
 let uniqueStores = [];     // Daftar toko unik untuk dropdown
 let uniqueTags = [];       // Daftar tags unik untuk dropdown
+// Helper: Mencegah XSS & SyntaxError
+function escapeHTML(str) {
+    if (!str) return '';
 
 /**
  * 1. AMBIL DATA DARI FIREBASE
@@ -81,7 +84,7 @@ async function loadProducts() {
 
 /**
  * 2. EKSTRAK NILAI UNIK DARI DATA PRODUK
- * Fungsi ini mengambil semua brand, toko, dan tags yang berbeda
+ * Fungsi ini mengambil semua toko, dan tags yang berbeda
  */
 function extractUniqueValues() {
     const categoriesSet = new Set();
@@ -109,19 +112,19 @@ function renderFilterOptions() {
     // Kategori
     filterCategory.innerHTML = '<option value="">Semua Kategori</option>';
     uniqueCategories.forEach(cat => {
-        filterCategory.innerHTML += `<option value="${cat}">${cat}</option>`;
+        filterCategory.innerHTML += `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}</option>`;
     });
-
+    
     // Toko
     filterStore.innerHTML = '<option value="">Semua Toko</option>';
     uniqueStores.forEach(store => {
-        filterStore.innerHTML += `<option value="${store}">${store}</option>`;
+        filterStore.innerHTML += `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`;
     });
-
+    
     // Tags
     filterTag.innerHTML = '<option value="">Semua Tags</option>';
     uniqueTags.forEach(tag => {
-        filterTag.innerHTML += `<option value="${tag}">#${tag}</option>`;
+        filterTag.innerHTML += `<option value="${escapeHTML(tag)}">#${escapeHTML(tag)}</option>`;
     });
 }
 
@@ -162,44 +165,39 @@ function applyFilters() {
  */
 function renderProducts(products) {
     productGrid.innerHTML = '';
-
     if (products.length === 0) {
         productGrid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-12">Tidak ada produk yang cocok dengan filter Anda.</p>`;
         return;
     }
-
     products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card bg-white rounded-xl overflow-hidden border border-gray-100 flex flex-col';
         
         // Tampilkan tags sebagai badge di kartu produk
         const tagsHtml = (product.tags || []).slice(0, 3).map(tag => 
-            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">#${tag}</span>`
+            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">#${escapeHTML(tag)}</span>`
         ).join('');
-
+        
         card.innerHTML = `
             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                <img src="${product.imageUrl || 'https://via.placeholder.com/300x400?text=No+Image'}" 
-                     alt="${product.name}" 
+                <img src="${escapeHTML(product.imageUrl) || 'https://via.placeholder.com/300x400?text=No+Image'}" 
+                     alt="${escapeHTML(product.name)}" 
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                      onerror="this.src='https://via.placeholder.com/300x400?text=Image+Error'">
             </div>
             <div class="p-4 flex flex-col flex-grow">
-                <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">${product.brand || 'Produk'}</p>
-                <h3 class="font-brand font-semibold text-dark mb-1 line-clamp-2">${product.name}</h3>
-                
+                <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">${escapeHTML(product.brand) || 'Produk'}</p>
+                <h3 class="font-brand font-semibold text-dark mb-1 line-clamp-2">${escapeHTML(product.name)}</h3>
                 <!-- Tampilkan nama toko -->
                 <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    ${product.storeName || 'Toko'}
+                    ${escapeHTML(product.storeName) || 'Toko'}
                 </p>
-                
                 <!-- Tampilkan tags -->
                 <div class="flex flex-wrap gap-1 mb-3 min-h-[24px]">
                     ${tagsHtml}
                 </div>
-
-                <a href="${product.affiliateLink}" target="_blank" rel="noopener noreferrer" 
+                <a href="${escapeHTML(product.affiliateLink)}" target="_blank" rel="noopener noreferrer" 
                    class="mt-auto w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-center transition flex items-center justify-center gap-2">
                     <span>Cek Detail</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
