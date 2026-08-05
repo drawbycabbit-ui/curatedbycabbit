@@ -92,6 +92,52 @@
                 </form>
             </div>
 
+			<!-- Filter Daftar Produk Admin -->
+			<div id="adminFilterSection" class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
+			  <h3 class="font-brand font-semibold text-dark mb-3">Cari & Filter Daftar Produk</h3>
+
+			  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+				<input
+				  type="text"
+				  id="adminSearchInput"
+				  placeholder="Cari nama produk..."
+				  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+				/>
+
+				<select
+				  id="adminFilterCategory"
+				  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+				>
+				  <option value="">Semua Kategori</option>
+				</select>
+
+				<select
+				  id="adminFilterStore"
+				  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+				>
+				  <option value="">Semua Toko</option>
+				</select>
+
+				<select
+				  id="adminFilterTag"
+				  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+				>
+				  <option value="">Semua Tags</option>
+				</select>
+
+				<button
+				  type="button"
+				  id="adminResetFilterBtn"
+				  class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-3 py-2 text-sm transition"
+				>
+				  Reset Filter
+				</button>
+			  </div>
+
+			  <p id="adminProductCount" class="text-xs text-gray-500 mt-3"></p>
+			</div>
+
+
             <!-- Tabel Daftar Produk -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="p-4 border-b border-gray-100">

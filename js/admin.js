@@ -26,8 +26,19 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formTitle = document.getElementById('formTitle');
 const submitBtn = document.getElementById('submitBtn');
 
+const adminSearchInput = document.getElementById('adminSearchInput');
+const adminFilterCategory = document.getElementById('adminFilterCategory');
+const adminFilterStore = document.getElementById('adminFilterStore');
+const adminFilterTag = document.getElementById('adminFilterTag');
+const adminResetFilterBtn = document.getElementById('adminResetFilterBtn');
+const adminProductCount = document.getElementById('adminProductCount');
+
 // Cache untuk menyimpan data produk sementara agar tidak perlu parse JSON lagi
 let productsCache = {};
+let adminProducts = [];
+let adminUniqueCategories = [];
+let adminUniqueStores = [];
+let adminUniqueTags = [];
 
 // --- 1. MANAJEMEN AUTENTIKASI ---
 
@@ -85,7 +96,10 @@ productForm.addEventListener('submit', async (e) => {
         updatedAt: serverTimestamp()
     };
 
-    if (!id) productData.createdAt = serverTimestamp();
+    if (!id) {
+		productData.createdAt = serverTimestamp();
+		productData.clickCount = 0;
+	}
 
     try {
         submitBtn.disabled = true;
@@ -122,45 +136,212 @@ function escapeHTML(str) {
 }
 
 async function loadAdminProducts() {
-    adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Memuat data...</td></tr>';
-    productsCache = {}; // Reset cache
-    
-    try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        adminProductList.innerHTML = '';
+  adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Memuat data...</td></tr>';
+  productsCache = {};
+  adminProducts = [];
 
-        querySnapshot.forEach((docSnap) => {
-            const p = docSnap.data();
-            productsCache[docSnap.id] = p; // Simpan objek asli ke cache
-            
-            const row = document.createElement('tr');
-            row.className = "hover:bg-gray-50 transition";
-            
-            row.innerHTML = `
-                <td class="p-4"><img src="${escapeHTML(p.imageUrl)}" class="w-12 h-12 object-cover rounded bg-gray-200" onerror="this.src='https://via.placeholder.com/48'"></td>
-                <td class="p-4">
-                    <div class="font-semibold text-dark">${escapeHTML(p.name)}</div>
-                    <div class="text-xs text-gray-500">${escapeHTML(p.brand || '-')}</div>
-                </td>
-                <td class="p-4 text-sm">${escapeHTML(p.storeName || '-')}</td>
-                <td class="p-4">
-                    <div class="flex flex-wrap gap-1">
-                        ${(p.tags || []).map(tag => 
-                            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">${escapeHTML(tag)}</span>`
-                        ).join('')}
-                    </div>
-                </td>
-                <td class="p-4 text-right space-x-2">
-                    <button class="edit-btn text-primary hover:text-secondary font-semibold text-xs border border-primary px-2 py-1 rounded" data-id="${docSnap.id}">Edit</button>
-                    <button class="delete-btn text-accent hover:text-red-800 font-semibold text-xs border border-accent px-2 py-1 rounded" data-id="${docSnap.id}">Hapus</button>
-                </td>
-            `;
-            adminProductList.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Gagal memuat data:", error);
-        adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal memuat data.</td></tr>';
+  try {
+    const querySnapshot = await getDocs(collection(db, "products"));
+
+    querySnapshot.forEach((docSnap) => {
+      const p = { id: docSnap.id, ...docSnap.data() };
+      productsCache[p.id] = p;
+      adminProducts.push(p);
+    });
+
+    // Urutkan produk admin dari yang terbaru
+    adminProducts.sort((a, b) => getAdminTime(b) - getAdminTime(a));
+
+    // Ekstrak kategori, toko, dan tags untuk dropdown filter
+    extractAdminUniqueValues();
+
+    // Render dropdown filter
+    renderAdminFilterOptions();
+
+    // Tampilkan tabel sesuai filter aktif
+    applyAdminFilters();
+
+  } catch (error) {
+    console.error("Gagal memuat data:", error);
+    adminProductList.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal memuat data.</td></tr>';
+  }
+}
+
+function getAdminTime(product) {
+  return product.createdAt?.seconds || product.updatedAt?.seconds || 0;
+}
+
+/**
+ * Ekstrak kategori/brand, toko, dan tags unik untuk filter admin
+ */
+function extractAdminUniqueValues() {
+  const categoriesSet = new Set();
+  const storesSet = new Set();
+  const tagsSet = new Set();
+
+  adminProducts.forEach(p => {
+    if (p.brand) categoriesSet.add(p.brand);
+    if (p.storeName) storesSet.add(p.storeName);
+
+    if (Array.isArray(p.tags)) {
+      p.tags.forEach(tag => tagsSet.add(tag));
     }
+  });
+
+  adminUniqueCategories = [...categoriesSet].sort();
+  adminUniqueStores = [...storesSet].sort();
+  adminUniqueTags = [...tagsSet].sort();
+}
+
+/**
+ * Render dropdown filter admin
+ */
+function renderAdminFilterOptions() {
+  if (!adminFilterCategory || !adminFilterStore || !adminFilterTag) return;
+
+  const currentCategory = adminFilterCategory.value;
+  const currentStore = adminFilterStore.value;
+  const currentTag = adminFilterTag.value;
+
+  // Kategori
+  adminFilterCategory.innerHTML = '<option value="">Semua Kategori</option>';
+  adminUniqueCategories.forEach(cat => {
+    adminFilterCategory.insertAdjacentHTML(
+      'beforeend',
+      `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}</option>`
+    );
+  });
+
+  // Toko
+  adminFilterStore.innerHTML = '<option value="">Semua Toko</option>';
+  adminUniqueStores.forEach(store => {
+    adminFilterStore.insertAdjacentHTML(
+      'beforeend',
+      `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`
+    );
+  });
+
+  // Tags
+  adminFilterTag.innerHTML = '<option value="">Semua Tags</option>';
+  adminUniqueTags.forEach(tag => {
+    adminFilterTag.insertAdjacentHTML(
+      'beforeend',
+      `<option value="${escapeHTML(tag)}">#${escapeHTML(tag)}</option>`
+    );
+  });
+
+  // Pertahankan pilihan filter sebelumnya jika masih valid
+  setAdminSelectValue(adminFilterCategory, currentCategory);
+  setAdminSelectValue(adminFilterStore, currentStore);
+  setAdminSelectValue(adminFilterTag, currentTag);
+}
+
+/**
+ * Helper untuk mempertahankan selected value dropdown setelah opsi dirender ulang
+ */
+function setAdminSelectValue(selectEl, value) {
+  if (!selectEl || !value) return;
+
+  const optionExists = [...selectEl.options].some(option => option.value === value);
+  if (optionExists) {
+    selectEl.value = value;
+  }
+}
+
+/**
+ * Terapkan search + filter kategori + toko + tags di admin
+ */
+function applyAdminFilters() {
+  // Jika elemen filter belum ditambahkan di HTML, tampilkan semua produk
+  if (!adminSearchInput || !adminFilterCategory || !adminFilterStore || !adminFilterTag) {
+    renderAdminTable(adminProducts);
+    return;
+  }
+
+  const keyword = adminSearchInput.value.toLowerCase().trim();
+  const selectedCategory = adminFilterCategory.value;
+  const selectedStore = adminFilterStore.value;
+  const selectedTag = adminFilterTag.value;
+
+  const filtered = adminProducts.filter(product => {
+    const matchKeyword = !keyword || (product.name || '').toLowerCase().includes(keyword);
+    const matchCategory = !selectedCategory || product.brand === selectedCategory;
+    const matchStore = !selectedStore || product.storeName === selectedStore;
+    const matchTag = !selectedTag || (Array.isArray(product.tags) && product.tags.includes(selectedTag));
+
+    return matchKeyword && matchCategory && matchStore && matchTag;
+  });
+
+  renderAdminTable(filtered);
+
+  if (adminProductCount) {
+    adminProductCount.textContent = `Menampilkan ${filtered.length} dari ${adminProducts.length} produk`;
+  }
+}
+
+/**
+ * Render tabel produk admin
+ */
+function renderAdminTable(products) {
+  adminProductList.innerHTML = '';
+
+  if (!products.length) {
+    adminProductList.innerHTML = `
+      <tr>
+        <td colspan="5" class="p-4 text-center text-gray-500">
+          Tidak ada produk yang cocok dengan filter Anda.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  products.forEach(p => {
+    const row = document.createElement('tr');
+    row.className = "hover:bg-gray-50 transition";
+
+    row.innerHTML = `
+      <td class="p-4">
+        <img src="${escapeHTML(p.imageUrl)}"
+             class="w-12 h-12 object-cover rounded bg-gray-200"
+             onerror="this.src='https://via.placeholder.com/48'">
+      </td>
+
+      <td class="p-4">
+        <div class="font-semibold text-dark">${escapeHTML(p.name)}</div>
+        <div class="text-xs text-gray-500">${escapeHTML(p.brand || '-')}</div>
+        <div class="text-[11px] text-gray-400 mt-1">
+          Klik: ${p.clickCount || 0}
+        </div>
+      </td>
+
+      <td class="p-4 text-sm">
+        ${escapeHTML(p.storeName || '-')}
+      </td>
+
+      <td class="p-4">
+        <div class="flex flex-wrap gap-1">
+          ${(p.tags || []).map(tag =>
+            `<span class="bg-light text-secondary text-xs px-2 py-0.5 rounded">${escapeHTML(tag)}</span>`
+          ).join('')}
+        </div>
+      </td>
+
+      <td class="p-4 text-right space-x-2">
+        <button class="edit-btn text-primary hover:text-secondary font-semibold text-xs border border-primary px-2 py-1 rounded"
+                data-id="${escapeHTML(p.id)}">
+          Edit
+        </button>
+
+        <button class="delete-btn text-accent hover:text-red-800 font-semibold text-xs border border-accent px-2 py-1 rounded"
+                data-id="${escapeHTML(p.id)}">
+          Hapus
+        </button>
+      </td>
+    `;
+
+    adminProductList.appendChild(row);
+  });
 }
 
 // EVENT DELEGATION: Menangani klik tombol Edit dan Hapus secara terpusat
@@ -208,6 +389,35 @@ function prepareEditProduct(id, p) {
 }
 
 cancelEditBtn.addEventListener('click', resetForm);
+
+/**
+ * Event listeners filter admin
+ */
+if (adminSearchInput) {
+  adminSearchInput.addEventListener('input', applyAdminFilters);
+}
+
+if (adminFilterCategory) {
+  adminFilterCategory.addEventListener('change', applyAdminFilters);
+}
+
+if (adminFilterStore) {
+  adminFilterStore.addEventListener('change', applyAdminFilters);
+}
+
+if (adminFilterTag) {
+  adminFilterTag.addEventListener('change', applyAdminFilters);
+}
+
+if (adminResetFilterBtn) {
+  adminResetFilterBtn.addEventListener('click', () => {
+    adminSearchInput.value = '';
+    adminFilterCategory.value = '';
+    adminFilterStore.value = '';
+    adminFilterTag.value = '';
+    applyAdminFilters();
+  });
+}
 
 function resetForm() {
     productForm.reset();

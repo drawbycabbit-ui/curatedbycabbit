@@ -33,10 +33,12 @@ async function loadProducts() {
     applyFilters();
 } */
 
-import { db } from './firebase-config.js';
 import {
   collection,
-  getDocs
+  getDocs,
+  doc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
@@ -46,6 +48,8 @@ const searchInput = document.getElementById('searchInput');
 const filterCategory = document.getElementById('filterCategory');
 const filterStore = document.getElementById('filterStore');
 const filterTag = document.getElementById('filterTag');
+const sortSelect = document.getElementById('sortSelect');
+let sortMode = 'newest'; // newest | az | za | popular
 const resetFilterBtn = document.getElementById('resetFilterBtn');
 const productCount = document.getElementById('productCount');
 
@@ -152,16 +156,70 @@ function renderFilterOptions() {
 /**
  * 4. TERAPKAN SEMUA FILTER (Search + Kategori + Toko + Tags)
  */
+ 
+ /**
+ * Ambil timestamp produk untuk sorting newest
+ */
+function getProductTime(product) {
+  return product.createdAt?.seconds || product.updatedAt?.seconds || 0;
+}
+
+/**
+ * Sort produk berdasarkan mode:
+ * - newest: terbaru ditambahkan
+ * - az: nama A-Z
+ * - za: nama Z-A
+ * - popular: clickCount terbanyak
+ */
+function sortProducts(products) {
+  const sorted = [...products];
+
+  switch (sortMode) {
+    case 'az':
+      sorted.sort((a, b) => {
+        return (a.name || '').localeCompare(b.name || '', 'id', { sensitivity: 'base' });
+      });
+      break;
+
+    case 'za':
+      sorted.sort((a, b) => {
+        return (b.name || '').localeCompare(a.name || '', 'id', { sensitivity: 'base' });
+      });
+      break;
+
+    case 'popular':
+      sorted.sort((a, b) => {
+        const clickA = a.clickCount || 0;
+        const clickB = b.clickCount || 0;
+
+        // Jika jumlah klik sama, fallback ke produk terbaru
+        if (clickB === clickA) {
+          return getProductTime(b) - getProductTime(a);
+        }
+
+        return clickB - clickA;
+      });
+      break;
+
+    case 'newest':
+    default:
+      sorted.sort((a, b) => getProductTime(b) - getProductTime(a));
+      break;
+  }
+
+  return sorted;
+}
+ 
 function applyFilters() {
-    const keyword = searchInput.value.toLowerCase().trim();
-    const selectedCategory = filterCategory.value;
-    const selectedStore = filterStore.value;
-    const selectedTag = filterTag.value;
+	const keyword = searchInput.value.toLowerCase().trim();
+	const selectedCategory = filterCategory.value;
+	const selectedStore = filterStore.value;
+	const selectedTag = filterTag.value;
 
     const filtered = allProducts.filter(product => {
         // Filter 1: Nama produk mengandung keyword
-        const matchKeyword = !keyword || product.name.toLowerCase().includes(keyword);
-        
+        const matchKeyword = !keyword || (product.name || '').toLowerCase().includes(keyword);
+		
         // Filter 2: Kategori cocok (jika dipilih)
         const matchCategory = !selectedCategory || product.brand === selectedCategory;
         
@@ -174,11 +232,12 @@ function applyFilters() {
         // Semua kondisi harus terpenuhi (AND logic)
         return matchKeyword && matchCategory && matchStore && matchTag;
     });
-
-    renderProducts(filtered);
+	// Terapkan sorting setelah filtering
+	const sortedProducts = sortProducts(filtered);
+    renderProducts(sortedProducts);
     
     // Update counter
-    productCount.textContent = `Menampilkan ${filtered.length} dari ${allProducts.length} produk`;
+    productCount.textContent = `Menampilkan ${sortedProducts.length} dari ${allProducts.length} produk`;
 }
 
 /**
@@ -218,16 +277,25 @@ function renderProducts(products) {
                 <div class="flex flex-wrap gap-1 mb-3 min-h-[24px]">
                     ${tagsHtml}
                 </div>
-                <a href="${escapeHTML(product.affiliateLink)}" target="_blank" rel="noopener noreferrer" 
-                   class="mt-auto w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-center transition flex items-center justify-center gap-2">
-                    <span>Cek Detail</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                </a>
+                
+				<a href="${escapeHTML(product.affiliateLink)}"
+				   target="_blank"
+				   rel="noopener noreferrer"
+				   class="affiliate-link mt-auto w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-center transition flex items-center justify-center gap-2"
+				   data-id="${escapeHTML(product.id)}"
+				   data-name="${escapeHTML(product.name)}">
+					<span>Cek Detail</span>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+					</svg>
+				</a>
             </div>
         `;
         productGrid.appendChild(card);
     });
 }
+
+<a href="${escapeHTML(product.affiliateLink)}" target="_blank" rel="noopener noreferrer" class="mt-auto w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-center transition flex items-center justify-center gap-2">
 
 /**
  * 6. EVENT LISTENERS - Semua filter trigger fungsi applyFilters()
@@ -236,6 +304,12 @@ searchInput.addEventListener('input', applyFilters);
 filterCategory.addEventListener('change', applyFilters);
 filterStore.addEventListener('change', applyFilters);
 filterTag.addEventListener('change', applyFilters);
+if (sortSelect) {
+  sortSelect.addEventListener('change', () => {
+    sortMode = sortSelect.value;
+    applyFilters();
+  });
+}
 
 // Reset semua filter
 resetFilterBtn.addEventListener('click', () => {
@@ -244,6 +318,58 @@ resetFilterBtn.addEventListener('click', () => {
     filterStore.value = '';
     filterTag.value = '';
     applyFilters();
+});
+
+/**
+ * Tracking klik affiliate
+ * - Kirim event ke Google Analytics jika tersedia
+ * - Tambah clickCount di Firestore untuk sorting "Most Clickable"
+ */
+productGrid.addEventListener('click', async (e) => {
+  const link = e.target.closest('a.affiliate-link');
+  if (!link) return;
+
+  const productId = link.dataset.id || '';
+  const productName = link.dataset.name || '';
+
+  // Kirim event ke Google Analytics jika gtag tersedia
+  if (typeof gtag === 'function') {
+    gtag('event', 'affiliate_click', {
+      product_id: productId,
+      product_name: productName,
+      link_url: link.href
+    });
+  }
+
+  if (!productId) return;
+
+  /**
+   * Opsional: mencegah write berulang dalam satu sesi.
+   * Ini membantu menghemat kuota write Firebase.
+   * Jika ingin mencatat setiap klik, hapus bagian sessionStorage ini.
+   */
+  const clickKey = `affiliate_click_${productId}`;
+  if (sessionStorage.getItem(clickKey)) return;
+  sessionStorage.setItem(clickKey, '1');
+
+  try {
+    await updateDoc(doc(db, "products", productId), {
+      clickCount: increment(1)
+    });
+
+    // Update data lokal agar sorting popular langsung terasa tanpa reload
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+      product.clickCount = (product.clickCount || 0) + 1;
+    }
+
+    // Jika sedang memakai sorting popular, refresh urutan
+    if (sortMode === 'popular') {
+      applyFilters();
+    }
+  } catch (error) {
+    console.error("Gagal mencatat klik affiliate:", error);
+  }
 });
 
 // Jalankan saat halaman dimuat
