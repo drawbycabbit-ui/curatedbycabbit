@@ -1,126 +1,184 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curated by Cabbit</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Konfigurasi Tailwind untuk menggunakan palette warna kita -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#0a0002',
-                        light: '#e2e0f5',
-                        primary: '#8e5cb2',
-                        secondary: '#053048',
-                        accent: '#c20003',
-                    }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curated by Cabbit — Rekomendasi Produk Pilihan</title>
+  <meta name="description" content="Kurasi produk unik pilihan. Temukan produk favoritmu sekarang!">
+
+  <!-- Font: Plus Jakarta Sans (100% free commercial use) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN + konfigurasi warna (CSS variables untuk dark mode) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface:   'var(--surface)',
+            dark:      'var(--text)',
+            muted:     'var(--text-muted)',
+            light:     'var(--primary-soft)',
+            primary:   'var(--primary)',
+            secondary: 'var(--secondary)',
+            accent:    'var(--accent)',
+            gray: {
+              50:  'var(--surface-hover)',
+              100: 'var(--border)',
+              200: 'var(--border-strong)',
+              400: 'var(--text-muted)',
+              500: 'var(--text-muted)',
+              600: 'var(--text-muted)'
             }
+          },
+          fontFamily: {
+            brand: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans:  ['"Plus Jakarta Sans"', 'sans-serif']
+          }
         }
-    </script>
-    <link rel="stylesheet" href="css/style.css">
+      }
+    }
+  </script>
+
+  <!-- Set tema sebelum halaman dirender (hindari flash) -->
+  <script>
+    if (localStorage.getItem('theme') === 'dark' ||
+       (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Google Analytics: ganti G-XXXXXXX dengan Measurement ID Anda -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-68BKJJGBXP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-68BKJJGBXP');
+  </script>
 </head>
-<body class="bg-light text-dark flex flex-col min-h-screen">
 
-    <!-- 1. HEADER: Logo, dan Link Admin -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <!-- Logo -->
-                <a href="index.html" class="text-3xl font-brand font-bold text-primary tracking-tight">
-                    CURATEDBY<span class="text-secondary">CABBIT</span>
-                </a>
+<body class="bg-surface font-sans text-dark antialiased">
 
-                <!-- Link ke Admin (Bisa disembunyikan atau diberi icon gear) -->
-                <a href="admin.html" class="text-sm font-semibold text-secondary hover:text-primary transition flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Admin
-                </a>
-            </div>
-        </div>
-    </header>
+  <!-- ===== HEADER ===== -->
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="index.html" class="font-brand font-800 text-xl tracking-tight flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold">C</span>
+        CURATED<span class="text-primary">CABBIT</span>
+      </a>
 
-    <!-- 2. HERO SECTION: Banner promosi sederhana -->
-    <section class="bg-secondary text-white py-12">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="text-3xl md:text-5xl font-brand font-bold mb-4">Rekomendasi Produk Pilihan</h1>
-            <p class="text-lg opacity-90 max-w-2xl mx-auto">Suka barang-barang yang tidak biasa? Intip koleksi unik pilihan kami di sini! Yuk, temukan produk favoritmu sekarang!</p>
-        </div>
-    </section>
+      <div class="flex items-center gap-2">
+        <!-- Tombol Dark Mode -->
+        <button id="themeToggle" aria-label="Ganti tema"
+                class="w-10 h-10 rounded-lg border border-gray-100 hover:bg-gray-50 flex items-center justify-center transition">
+          <svg id="iconSun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5M12 19.5V21M4.2 4.2l1.1 1.1M18.7 18.7l1.1 1.1M3 12h1.5M19.5 12H21M4.2 19.8l1.1-1.1M18.7 5.3l1.1-1.1M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/>
+          </svg>
+          <svg id="iconMoon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>
+          </svg>
+        </button>
 
-    <!-- 3. PRODUCT GRID: Tempat produk akan di-render oleh JavaScript -->
-	<main class="container mx-auto px-4 py-8 flex-grow">
-		
-		<!-- FILTER BAR BARU -->
-		<div class="bg-white rounded-xl shadow-sm p-4 mb-8 border border-gray-100">
-			<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-				
-				<!-- Search Nama Produk (sudah ada, dipindah ke sini) -->
-				<div class="relative">
-					<input type="text" id="searchInput" placeholder="Cari nama produk..." 
-						   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-					<svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-				</div>
+        <a href="admin.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition">
+          Admin
+        </a>
+      </div>
+    </div>
+  </header>
 
-				<!-- Filter Kategori/Brand -->
-				<select id="filterCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
-					<option value="">Semua Kategori</option>
-				</select>
+  <!-- ===== HERO ===== -->
+  <section class="max-w-7xl mx-auto px-4 pt-10 pb-6 text-center">
+    <h1 class="font-brand font-extrabold text-3xl md:text-4xl mb-3">Rekomendasi Produk Pilihan</h1>
+    <p class="text-muted max-w-xl mx-auto">
+      Suka barang-barang yang tidak biasa? Intip koleksi unik pilihan kami di sini.
+      Yuk, temukan produk favoritmu sekarang!
+    </p>
+  </section>
 
-				<!-- Filter Nama Tema -->
-				<select id="filterStore" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
-					<option value="">Semua Tema</option>
-				</select>
+  <!-- ===== TOOLBAR: SEARCH + FILTER + SORT (SATU BARIS) ===== -->
+  <section class="max-w-7xl mx-auto px-4 pb-6">
+    <div class="toolbar bg-surface border border-gray-100 rounded-2xl p-3 shadow-sm
+                flex flex-wrap items-center gap-2">
 
-				<!-- Filter Tags -->
-				<select id="filterTag" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white">
-					<option value="">Semua Tags</option>
-				</select>
-				
-				<!-- Filter Select -->
-				<label for="sortSelect" class="sr-only">Urutkan produk</label>
-				<select id="sortSelect">
-					<option value="newest">Terbaru Ditambahkan</option>
-					<option value="az">Nama A-Z</option>
-					<option value="za">Nama Z-A</option>
-					<option value="popular">Paling Banyak Diklik</option>
-				</select>
-			</div>
+      <!-- Search -->
+      <div class="relative flex-grow min-w-[220px]">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.3-4.3M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
+        </svg>
+        <input type="search" id="searchInput" placeholder="Cari produk unik..."
+               class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-100
+                      focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm">
+      </div>
 
-			<!-- Tombol Reset Filter -->
-			<div class="mt-3 flex justify-end">
-				<button id="resetFilterBtn" class="text-sm text-accent hover:text-red-800 font-semibold flex items-center gap-1">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-					Reset Filter
-				</button>
-			</div>
-		</div>
+      <!-- Filter Kategori -->
+      <select id="filterCategory" class="filter-select">
+        <option value="">Semua Kategori</option>
+      </select>
 
-		<!-- Info jumlah produk hasil filter -->
-		<div class="flex justify-between items-center mb-6">
-			<h2 class="text-2xl font-brand font-bold text-secondary border-l-4 border-primary pl-3">Kurasi Terkini</h2>
-			<p id="productCount" class="text-sm text-gray-500">Memuat...</p>
-		</div>
-		
-		<div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-			<p class="col-span-full text-center text-gray-500">Memuat produk...</p>
-		</div>
-	</main>
+      <!-- Filter Tema -->
+      <select id="filterStore" class="filter-select">
+        <option value="">Semua Tema</option>
+      </select>
 
-    <!-- 4. FOOTER -->
-    <footer class="bg-dark text-light py-8 mt-auto">
-        <div class="container mx-auto px-4 text-center">
-            <p class="font-brand text-xl font-bold mb-2">CURATEDBYCABBIT</p>
-            <p class="text-sm opacity-70">&copy; 2026 All rights reserved. Website ini berisi link afiliasi.</p>
-        </div>
-    </footer>
+      <!-- Filter Tags -->
+      <select id="filterTag" class="filter-select">
+        <option value="">Semua Tags</option>
+      </select>
 
-    <!-- Import Logic JavaScript (tipe module agar bisa import firebase) -->
-    <script type="module" src="js/app.js"></script>
+      <!-- Sort -->
+      <select id="sortSelect" class="filter-select">
+        <option value="newest">Terbaru Ditambahkan</option>
+        <option value="az">Nama A-Z</option>
+        <option value="za">Nama Z-A</option>
+        <option value="popular">Paling Banyak Diklik</option>
+      </select>
+
+      <!-- Reset -->
+      <button id="resetFilterBtn"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-accent border border-accent/40
+                     hover:bg-accent hover:text-white transition">
+        Reset
+      </button>
+    </div>
+
+    <!-- Counter produk -->
+    <p id="productCount" class="text-xs text-muted mt-3"></p>
+  </section>
+
+  <!-- ===== GRID PRODUK ===== -->
+  <main class="max-w-7xl mx-auto px-4 pb-16">
+    <h2 class="font-brand font-bold text-xl mb-4">Kurasi Terkini</h2>
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      <p class="col-span-full text-center text-muted py-12">Memuat produk...</p>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="border-t border-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <p class="font-brand font-bold tracking-tight">CURATED<span class="text-primary">CABBIT</span></p>
+      <p class="text-xs text-muted mt-2">© 2026 All rights reserved. Website ini berisi link afiliasi.</p>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPT DARK MODE TOGGLE ===== -->
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  </script>
+
+  <!-- Logika utama -->
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

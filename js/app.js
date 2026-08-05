@@ -80,7 +80,6 @@ function escapeHTML(str) {
         .replace(/'/g, '&#39;');
 }
 
-
 // --- 2. AMBIL DATA DARI FIREBASE ---
 /**
 AMBIL DATA DARI FIREBASE
@@ -300,7 +299,7 @@ function renderProducts(products) {
 
     products.forEach(product => {
         const card = document.createElement('div');
-        card.className = 'product-card bg-white rounded-xl overflow-hidden border border-gray-100 flex flex-col';
+        card.className = 'product-card rounded-xl overflow-hidden border border-gray-100 flex flex-col';
 
         // Tampilkan tags sebagai badge di kartu produk
         const tagsHtml = (product.tags || []).slice(0, 3).map(tag =>

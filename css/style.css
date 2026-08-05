@@ -1,44 +1,86 @@
-/* 
-  PENTING: Ganti URL font 'Outfit' di bawah dengan file font 'Peace Sans' Anda 
-  jika sudah memiliki file .woff2-nya. 'Outfit' digunakan sebagai fallback 
-  yang sangat mirip secara visual (modern, geometric sans-serif).
-*/
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;700&display=swap');
-
+/* =========================================================
+   VARIABEL WARNA — Light & Dark Mode
+   Nuansa ungu/lavender dipertahankan, lebih modern & lembut
+   ========================================================= */
 :root {
-  /* Definisi Palette Warna sesuai permintaan */
-  --color-dark: #0a0002;
-  --color-light: #e2e0f5;
-  --color-primary: #8e5cb2;
-  --color-secondary: #053048;
-  --color-accent: #c20003;
+  --bg:             #f6f4fa;
+  --surface:        #ffffff;
+  --surface-hover:  #faf8fd;
+  --text:           #1c1226;
+  --text-muted:     #7a7185;
+  --primary:        #8e5cb2;
+  --primary-hover:  #7d4ba3;
+  --primary-soft:   #f1e8f9;
+  --secondary:      #053048;
+  --accent:         #c20003;
+  --border:         #e9e4f2;
+  --border-strong:  #d8d0e6;
 }
 
-body {
-  font-family: 'Open Sans', sans-serif;
-  background-color: var(--color-light);
-  color: var(--color-dark);
+.dark {
+  --bg:             #120b1c;
+  --surface:        #1d1329;
+  --surface-hover:  #291b3a;
+  --text:           #f2eefa;
+  --text-muted:     #a99fbd;
+  --primary:        #a875d1;
+  --primary-hover:  #bb90e0;
+  --primary-soft:   #33204a;
+  --secondary:      #8ec3e8;
+  --accent:         #ff7074;
+  --border:         #322344;
+  --border-strong:  #443059;
 }
 
-h1, h2, h3, h4, h5, h6, .font-brand {
-  font-family: 'Outfit', 'Peace Sans', sans-serif; /* Menggunakan font brand untuk heading */
+/* Latar halaman mengikuti tema */
+html { background-color: var(--bg); }
+body { background-color: var(--bg); transition: background-color .3s ease, color .3s ease; }
+
+/* =========================================================
+   KOMPONEN UMUM
+   ========================================================= */
+.filter-select {
+  appearance: none;
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.875rem;
+  padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%237a7185' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1em;
+  transition: border-color .2s ease;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
-/* Efek hover pada kartu produk agar terasa premium seperti Zalora */
+/* Kartu produk — efek hover premium */
 .product-card {
-  transition: all 0.3s ease;
+  background-color: var(--surface);
+  transition: transform .3s ease, box-shadow .3s ease, background-color .3s ease;
 }
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(10, 0, 2, 0.1), 0 8px 10px -6px rgba(10, 0, 2, 0.1);
+  box-shadow: 0 12px 28px -8px color-mix(in srgb, var(--text) 18%, transparent);
 }
 
 /* Badge diskon */
 .discount-badge {
-  background-color: var(--color-accent);
-  color: white;
-  font-size: 0.75rem;
+  background-color: var(--accent);
+  color: #fff;
+  font-size: .75rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* Scrollbar rapi (opsional) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
