@@ -295,8 +295,6 @@ function renderProducts(products) {
     });
 }
 
-<a href="${escapeHTML(product.affiliateLink)}" target="_blank" rel="noopener noreferrer" class="mt-auto w-full bg-primary hover:bg-opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-center transition flex items-center justify-center gap-2">
-
 /**
  * 6. EVENT LISTENERS - Semua filter trigger fungsi applyFilters()
  */
