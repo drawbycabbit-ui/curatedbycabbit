@@ -263,7 +263,7 @@ function renderAdminFilterOptions() {
     });
 
     // Toko
-    adminFilterStore.innerHTML = '<option value="">Semua Toko</option>';
+    adminFilterStore.innerHTML = '<option value="">Semua Tema</option>';
 
     adminUniqueStores.forEach(store => {
         adminFilterStore.innerHTML += `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`;

@@ -37,15 +37,13 @@ async function loadProducts() {
 */
 
 import { db } from './firebase-config.js';
-
 import {
-    collection,
-    getDocs,
-    doc,
-    updateDoc,
-    increment
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
 
 // Referensi elemen HTML
 const productGrid = document.getElementById('productGrid');
@@ -165,8 +163,8 @@ function renderFilterOptions() {
         filterCategory.innerHTML += `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}</option>`;
     });
 
-    // Toko
-    filterStore.innerHTML = '<option value="">Semua Toko</option>';
+    // Tema
+    filterStore.innerHTML = '<option value="">Semua Tema</option>';
 
     uniqueStores.forEach(store => {
         filterStore.innerHTML += `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`;
@@ -331,7 +329,7 @@ function renderProducts(products) {
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
-                    ${escapeHTML(product.storeName) || 'Toko'}
+                    ${escapeHTML(product.storeName) || 'Tema'}
                 </p>
 
                 <!-- Tampilkan tags -->
