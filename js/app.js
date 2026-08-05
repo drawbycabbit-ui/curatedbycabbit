@@ -49,9 +49,18 @@ let allProducts = []; // Semua produk dari Firebase
 let uniqueCategories = []; // Daftar kategori unik untuk dropdown
 let uniqueStores = [];     // Daftar toko unik untuk dropdown
 let uniqueTags = [];       // Daftar tags unik untuk dropdown
+
 // Helper: Mencegah XSS & SyntaxError
 function escapeHTML(str) {
-    if (!str) return '';
+  if (!str) return '';
+
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /**
  * 1. AMBIL DATA DARI FIREBASE
