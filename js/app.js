@@ -34,7 +34,11 @@ async function loadProducts() {
 } */
 
 import { db } from './firebase-config.js';
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 
 // Referensi elemen HTML
 const productGrid = document.getElementById('productGrid');
@@ -66,16 +70,18 @@ function escapeHTML(str) {
  * 1. AMBIL DATA DARI FIREBASE
  */
 async function loadProducts() {
-    try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        allProducts = [];
-        
-        querySnapshot.forEach((doc) => {
-            allProducts.push({ id: doc.id, ...doc.data() });
-        });
+	try {
+		const querySnapshot = await getDocs(collection(db, "products"));
+		allProducts = [];
+		
+		querySnapshot.forEach((doc) => {
+			allProducts.push({ id: doc.id, ...doc.data() });
+		});
 
         // Urutkan berdasarkan terbaru
-        allProducts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        allProducts.sort((a, b) => {
+			return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+		});
         
         // EKSTRAK data unik untuk filter
         extractUniqueValues();
@@ -86,8 +92,13 @@ async function loadProducts() {
         // Tampilkan semua produk
         applyFilters();
     } catch (error) {
-        console.error("Gagal memuat produk:", error);
-        productGrid.innerHTML = `<p class="col-span-full text-center text-accent">Gagal memuat produk.</p>`;
+		console.error("Gagal memuat produk:", error);
+
+		productGrid.innerHTML = `
+		  <p class="col-span-full text-center text-accent">
+			Gagal memuat produk. Silakan cek console.
+		  </p>
+		 `;
     }
 }
 
@@ -96,17 +107,18 @@ async function loadProducts() {
  * Fungsi ini mengambil semua toko, dan tags yang berbeda
  */
 function extractUniqueValues() {
-    const categoriesSet = new Set();
-    const storesSet = new Set();
-    const tagsSet = new Set();
+	const categoriesSet = new Set();
+	const storesSet = new Set();
+	const tagsSet = new Set();
 
-    allProducts.forEach(p => {
-        if (p.brand) categoriesSet.add(p.brand);
-        if (p.storeName) storesSet.add(p.storeName);
-        if (Array.isArray(p.tags)) {
-            p.tags.forEach(tag => tagsSet.add(tag));
-        }
-    });
+	allProducts.forEach(p => {
+		if (p.brand) categoriesSet.add(p.brand);
+		if (p.storeName) storesSet.add(p.storeName);
+
+		if (Array.isArray(p.tags)) {
+			p.tags.forEach(tag => tagsSet.add(tag));
+		}
+	});
 
     // Ubah Set ke Array dan urutkan alfabetis
     uniqueCategories = [...categoriesSet].sort();
